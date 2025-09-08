@@ -48,22 +48,29 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 % Acá arrancamos el TAD --------------------------------------------------
 \begin{tad}{EdR}
 
-% Estos no se si serían obs, pero los pongo acá para entender
-% que serían los atributos, cualquier cosa despues los cambiamos
+% SECCIÓN DE DUDAS/COMENTARIOS --------------------------------------------------
+
+% Preguntar si estudiantes necesita nombre o identificación
+% Preguntar por \yLuego
+% Preguntar por igualdad(), si basta con '=' en arrays
+
+% RENOMBRE DE TIPOS --------------------------------------------------
+
+% Aula: Array de Array de Examen
+% Estudiante: -
+% Nota: Int
+% Examen: Seq(Seq(Char)) # Me parece que esto sería Seq(Char)
+
+% es decir, cada "instancia" de Examen, sería un array con las respuestas
+% ej: examen1 = ['A', 'F', 'J', 'C'], uno sin responder: ['', '', '', '']
+% y uno a medio responder: ['B', '', '', 'D'] 
+% (El largo lo determina la cantidad de ejercicios)
+
 \obs{aula}{Aula}
 \\
 \obs{solucion}{Examen}
 \\
 
-% Aula: Array de Array de Examen
-% Estudiante: 
-% Examen: Seq(Seq(Char))
-% Nota: Int
-
-
-% Acá arrancamos con los "metodos"
-
-% Este procedimiento en el enunciado del TP aparece como EdR simplemente
 % Metodo EdR --------------------------------------------------
 \begin{proc}{EdR}
 {
@@ -77,26 +84,32 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
     \aseguraLargo{
         (\norm{res.aula} = \norm{a}) \yLuego
     \\ (\paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego \norm{res.aula[i]} = \norm{a[i]}}) \yLuego
-    \\ (\paraTodo{j}{\Z}{0 \leq i < \norm{res.aula} \implicaLuego noHayAlumnosJuntos(res.aula[i])}) \yLuego
+    \\ (\paraTodo{j}{\Z}{0 \leq j < \norm{res.aula} \implicaLuego noHayAlumnosJuntos(res.aula[j])}) \yLuego
     \\ (cuantosEstudiantes(res.aula) = cantEstudiantes) \yLuego
     \\ (res.solucion = s)
     }
 \end{proc}
-% Preguntar si estudiantes necesita nombre o identificación
-% Preguntar por \yLuego
-% Preguntar por igualdad(), si basta con '=' en arrays
-
-% Crear Predicado noHayAlumnosJuntos()
-%  \paraTodo{j}{\Z}{0 < j < \norm{aula[i]}-1 \implicaLuego (hayAlumno(aula[i][j]) \implica \neg (hayAlumno(aula[i][j-1]) \lor hayAlumno(aula[i][j+1])))}
 
 \predLargo{aulaCuadrada}{a: Aula}{
     \paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego \norm{a[i]} = \norm{a}}
+}
+
+\predLargo{examenValido}{s: Examen}{
+    (True)
 }
 
 \predLargo{cantValidaEstudiantes}{a: Aula, e: \Z}{
     ifthenelse(esPar(\norm{a}^ 2), \frac{\norm{a}^ 2}{2}, \frac{\norm{a}^ 2 + 1}{2})   
 }
 
+% Cree el predicado, lo adapté a la modularización y le cambié algo que era redundante.
+% Fijense que tuve que pones que fila es del tipo Array de Examen, podríamos hacer que sea tipo Fila?
+\predLargo{noHayAlumnosJuntos}{fila: \seq{Examen}}{
+    \paraTodo{i}{\Z}{0 <= i < \norm{fila}-1 \implicaLuego (hayAlumno(fila[i]) \implica \neg(hayAlumno(fila[i + 1])))}
+}
+
+% Así estaba antes, lo dejo por sí no estan de acuerdo con el cambio XD
+% \paraTodo{j}{\Z}{0 < j < \norm{aula[i]}-1 \implicaLuego (hayAlumno(aula[i][j]) \implica \neg (hayAlumno(aula[i][j-1]) \lor hayAlumno(aula[i][j+1])))}
 
 % Metodo igualdad --------------------------------------------------
 \begin{proc}{igualdad}
@@ -178,8 +191,6 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
     \requiere{True}
     \asegura{res}
 \end{proc}
-
-
 
 \end{tad}
 

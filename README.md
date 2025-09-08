@@ -8,3 +8,7 @@
 
 ### Pushear:
 	git push origin su-rama
+
+## O HAGANSE SUS FORKS XD
+
+	Y se tiran un Pull Request y yo lo mergeo todo. 

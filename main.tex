@@ -1,0 +1,176 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage[left=2.5cm,top=3cm,right=2.5cm,bottom=3cm,bindingoffset=0.5cm]{geometry}
+\usepackage{AEDLogica, AEDEspecificacion, AEDTADs}
+\usepackage{caratula}
+
+
+\titulo{Trabajo práctico}
+\subtitulo{Especificacion de TADs}
+
+\fecha{\today}
+
+\materia{Algoritmos y Estructuras de Datos}
+\grupo{BobElConstructorPorCopia}
+
+\integrante{Choque, Leandro}{252/25}{leandroch2002@gmail.com}
+\integrante{Musi, Santino}{965/24}{santinomusi1@gmail.com}
+\integrante{Rojas, Damian}{209/25}{dam.rojas1@gmail.com}
+\integrante{Martell, Juan Bautista}{622/25}{Juanbamartell@hotmail.com}
+% \integrante{Apellido, Nombre2}{002/01}{email2@dominio.com} %
+
+
+% Declaramos donde van a estar las figuras
+% No es obligatorio, pero suele ser comodo
+\graphicspath{{../static/}}
+
+% Asi pueden escribir nuevos comandos. 
+% Este por ejemplo asegura q los nombres 
+% que figuren con una tipografia diferenciada  
+\newcommand{\Tipo}[1]{\mathsf{#1}}
+% la sintaxis es \newcommand{\nombreDeLaMacro}[cantidadDeParametros]{Lo que va ser remplazado por el macro} 
+\newcommand{\norm}[1]{\vert #1\vert}
+
+% Empieza el documento
+\begin{document}
+
+\maketitle
+
+\section{Supongo que acá iría una descripción}
+
+Breve descripción.
+
+Luego veremos bien el formato, esto de momento es para tener un esqueleto.
+
+\section{Especificacion}
+
+% Acá arrancamos el TAD --------------------------------------------------
+\begin{tad}{EdR}
+
+% Estos no se si serían obs, pero los pongo acá para entender
+% que serían los atributos, cualquier cosa despues los cambiamos
+\obs{aula}{Aula}
+\\
+\obs{solucion}{Examen}
+\\
+
+% Aula: Array de Array de Examen
+% Estudiante: 
+% Examen: Seq(Seq(Char))
+% Nota: Int
+
+
+% Acá arrancamos con los "metodos"
+
+% Este procedimiento en el enunciado del TP aparece como EdR simplemente
+% Metodo EdR --------------------------------------------------
+\begin{proc}{EdR}
+{
+\In a: Aula,
+\In s: Examen,
+\In cantEstudiantes: \Z
+}{
+\Tipo{EdR}
+}
+    \requiere{aulaCuadrada(a) \yLuego \\ examenValido(solucion) \yLuego \\ cantValidaEstudiantes(a, cantEstudiantes) }
+    \aseguraLargo{
+        (\norm{res.aula} = \norm{a}) \yLuego
+    \\ (\paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego \norm{res.aula[i]} = \norm{a[i]}}) \yLuego
+    \\ (\paraTodo{j}{\Z}{0 \leq i < \norm{res.aula} \implicaLuego noHayAlumnosJuntos(res.aula[i])}) \yLuego
+    \\ (cuantosEstudiantes(res.aula) = cantEstudiantes) \yLuego
+    \\ (res.solucion = s)
+    }
+\end{proc}
+
+% Preguntar si estudiantes necesita nombre o identificación
+% Preguntar por \yLuego
+% Preguntar por igualdad(), si basta con '=' en arrays
+
+% Crear Predicado noHayAlumnosJuntos()
+%  \paraTodo{j}{\Z}{0 < j < \norm{aula[i]}-1 \implicaLuego (hayAlumno(aula[i][j]) \implica \neg (hayAlumno(aula[i][j-1]) \lor hayAlumno(aula[i][j+1])))}
+
+% Metodo igualdad --------------------------------------------------
+\begin{proc}{igualdad}
+{
+\In edr1,edr2: EdR,
+}{
+\Tipo{Bool}
+}
+    \requiere{True}
+    \aseguraLargo{(res = True) \leftrightarrow
+    \\ (Edr1.aula = Edr2.aula) \yLuego
+    \\ (Edr1.solucion = Edr2.solucion)
+    }
+\end{proc}
+
+% Metodo copiarse --------------------------------------------------
+\begin{proc}{copiarse}
+{
+\In alumno: Estudiante % que pase las coordenadas o su examen? 
+}{
+\Tipo{EdR}
+}
+    \requiere{True} % Que el alumno exista (Vemos cómo ponerlo depende de cómo identificamos al alumno) y que tenga a alguien en frente o a dos asientos de distancia a los lados
+    \asegura{res} % aula[i][j].examen[4] (para la pregunta 4 por ejemplo) == aula[i+1][j].examen[4] o aula[i][j+2] o aula[i][j+3] o aula[i][j-2] o aula[i][j-3] (Chequear si existen esas coordenadas)
+\end{proc}
+
+% Metodo publicarResolucion --------------------------------------------------
+\begin{proc}{publicarResolucion}
+{
+\In completar, Completar
+}{
+\Tipo{EdR}
+}
+    \requiere{True}
+    \asegura{res}
+\end{proc}
+
+% Metodo resolver --------------------------------------------------
+\begin{proc}{resolver}
+{
+\In completar, Completar
+}{
+\Tipo{EdR}
+}
+    \requiere{True}
+    \asegura{res}
+\end{proc}
+
+% Metodo entregar --------------------------------------------------
+\begin{proc}{entregar}
+{
+\In alumno: Estudiante
+}{
+\Tipo{EdR}
+}
+    \requiere{True} % Que el alumno exista
+    \asegura{res} % que aula[i][j] pase a estar vacío? Es suficiente?
+\end{proc}
+
+% Metodo chequearCopias --------------------------------------------------
+\begin{proc}{chequearCopias}
+{
+\In completar, Completar % Creo que no recibe nada o recibe un EdR
+}{
+\Tipo{seq<Estudiante>}
+}
+    \requiere{True} % Si no recibe nada va True, a lo mejor recibe un EdR pero entonces también iría True, mientras sea un EdR válido sirve
+    \asegura{res} % Acá hay que ver cómo poner lo de propoción de rtas equivalentes a compañero cercano >60% y eso, cómo medirlo, o eso sería muy implementativo?
+    % Quedaría tipo, para todo alumno en aula, si esSimilarACercano(aula[i][j].examen) o esSimilarAAlumnado(aula[i][j].examen) entonces se concatena a la secuencia
+\end{proc}
+
+% Metodo corregir --------------------------------------------------
+\begin{proc}{corregir} 
+{ %Acá dice que tenemos que corregir los examenes de los que no fueron sospechosos de copiarse, pero no podemos llamar un proc adentro de otro, o no?
+\In completar, Completar
+}{
+\Tipo{seq<<estudiante, nota>>}
+}
+    \requiere{True}
+    \asegura{res}
+\end{proc}
+
+\end{tad}
+
+\end{document}

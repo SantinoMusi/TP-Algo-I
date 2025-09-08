@@ -80,7 +80,7 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 }{
 \Tipo{EdR}
 }
-    \requiere{aulaCuadrada(a) \yLuego \\ examenValido(solucion) \yLuego \\ cantValidaEstudiantes(a, cantEstudiantes) }
+    \requiereLargo{aulaCuadrada(a) \yLuego \\ examenValido(solucion) \yLuego \\ cantValidaEstudiantes(a, cantEstudiantes) }
     \aseguraLargo{
         (\norm{res.aula} = \norm{a}) \yLuego
     \\ (\paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego \norm{res.aula[i]} = \norm{a[i]}}) \yLuego
@@ -95,7 +95,7 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 }
 
 \predLargo{examenValido}{s: Examen}{
-    (True)
+    (True) % Obviamente hay que completar esto XD
 }
 
 \predLargo{cantValidaEstudiantes}{a: Aula, e: \Z}{
@@ -111,6 +111,10 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 % Así estaba antes, lo dejo por sí no estan de acuerdo con el cambio XD
 % \paraTodo{j}{\Z}{0 < j < \norm{aula[i]}-1 \implicaLuego (hayAlumno(aula[i][j]) \implica \neg (hayAlumno(aula[i][j-1]) \lor hayAlumno(aula[i][j+1])))}
 
+\predLargo{cuantosEstudiantes}{a: Aula}{
+    (True) % Obviamente hay que completar esto XD
+}
+
 % Metodo igualdad --------------------------------------------------
 \begin{proc}{igualdad}
 {
@@ -120,8 +124,8 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 }
     \requiere{True}
     \aseguraLargo{(res = True) \leftrightarrow
-    \\ (Edr1.aula = Edr2.aula) \yLuego
-    \\ (Edr1.solucion = Edr2.solucion)
+    \\ (edr1.aula = edr2.aula) \yLuego
+    \\ (edr1.solucion = edr2.solucion)
     }
 \end{proc}
 

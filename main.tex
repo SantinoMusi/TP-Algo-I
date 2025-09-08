@@ -82,13 +82,21 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
     \\ (res.solucion = s)
     }
 \end{proc}
-
 % Preguntar si estudiantes necesita nombre o identificación
 % Preguntar por \yLuego
 % Preguntar por igualdad(), si basta con '=' en arrays
 
 % Crear Predicado noHayAlumnosJuntos()
 %  \paraTodo{j}{\Z}{0 < j < \norm{aula[i]}-1 \implicaLuego (hayAlumno(aula[i][j]) \implica \neg (hayAlumno(aula[i][j-1]) \lor hayAlumno(aula[i][j+1])))}
+
+\predLargo{aulaCuadrada}{a: Aula}{
+    \paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego \norm{a[i]} = \norm{a}}
+}
+
+\predLargo{cantValidaEstudiantes}{a: Aula, e: \Z}{
+    ifthenelse(esPar(\norm{a}^ 2), \frac{\norm{a}^ 2}{2}, \frac{\norm{a}^ 2 + 1}{2})   
+}
+
 
 % Metodo igualdad --------------------------------------------------
 \begin{proc}{igualdad}
@@ -170,6 +178,8 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
     \requiere{True}
     \asegura{res}
 \end{proc}
+
+
 
 \end{tad}
 

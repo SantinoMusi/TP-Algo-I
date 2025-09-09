@@ -85,12 +85,18 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 }{
 \Tipo{EdR}
 }
-    \requiereLargo{aulaCuadrada(a) \yLuego \\ aulaVacia(a) \yLuego \\ examenValido(solucion) \yLuego \\ cantValidaEstudiantes(a, cantEstudiantes) }
+    \requiereLargo{
+        aulaCuadrada(a) \yLuego 
+    \\ aulaVacia(a) \yLuego 
+    \\ examenValido(solucion) \yLuego 
+    \\ cantValidaEstudiantes(a, cantEstudiantes) }
     \aseguraLargo{
         (\norm{res.aula} = \norm{a}) \yLuego
-    \\ aulaCuadrada(res.aula) \yLuego\\ (\paraTodo{i}{\Z}{0 \leq i < \norm{res.aula} \implicaLuego noHayAlumnosJuntos(res.aula[i])}) \yLuego
+    \\ aulaCuadrada(res.aula) \yLuego
+    \\ (\paraTodo{i}{\Z}{0 \leq i < \norm{res.aula} \implicaLuego noHayAlumnosJuntos(res.aula[i])}) \yLuego
     \\ (cuantosEstudiantes(res.aula) = cantEstudiantes) \yLuego
-    \\ (res.solucion = s) \yLuego \\ aulaVacia(res.entregas)
+    \\ (res.solucion = s) \yLuego 
+    \\ aulaVacia(res.entregas)
     \\ \paraTodo{j}{\Z}{0 \leq j < \norm{a} \implicaLuego \paraTodo{k}{\Z}{0 \leq j < \norm{a[k]} \implicaLuego \norm{a[j][k]} \leq 1}}
     }
 \end{proc}
@@ -108,7 +114,7 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 }
 
 \predLargo{cantValidaEstudiantes}{a: Aula, e: \Z}{
-    e \leq ifthenelse(esPar(\norm{a}), \frac{\norm{a}^ 2}{2}, \frac{\norm{a[0]} + 1}{2} * \norm{a})   
+    (e \leq ifthenelse(esPar(\norm{a}), \frac{\norm{a}^ 2}{2}, \frac{\norm{a} + 1}{2} * \norm{a}))
 }
 
 \predLargo{noHayAlumnosJuntos}{fila: \seq{Examen}}{

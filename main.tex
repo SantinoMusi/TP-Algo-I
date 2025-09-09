@@ -56,20 +56,25 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 
 % RENOMBRE DE TIPOS --------------------------------------------------
 
-% Aula: Array de Array de Examen
-% Estudiante: -
+% Aula: Seq(Seq(Seq(Examen))) - Doble secuencia para representar
 % Nota: Int
-% Examen: Seq(Seq(Char)) # Me parece que esto sería Seq(Char)
+% Examen: Seq(Char) 
 
 % es decir, cada "instancia" de Examen, sería un array con las respuestas
 % ej: examen1 = ['A', 'F', 'J', 'C'], uno sin responder: ['', '', '', '']
 % y uno a medio responder: ['B', '', '', 'D'] 
 % (El largo lo determina la cantidad de ejercicios)
 
+% En Aula, la forma de matriz del aula, y en cada "asiento" hay una Seq(Examen) que representa las sucesivas instancias de resolución del alumno.
+
 \obs{aula}{Aula}
 \\
 \obs{solucion}{Examen}
 \\
+\obs{entregas}{Aula}
+\\
+% Agrego el obs entregas porque es necesario ir guardando los examenes que entregan los alumnos con el proc "entregar". La idea sería que arranca como un aula vacía. Cuando el aulmno [i][j] entrega, en el aula original ese asiento queda vacío, y en el aula de entregas, ese asiento guarda la última instancia del examen (la que tiene todas las respuestas marcadas). Así, es muy fácil al final chequear si se copió con los que tiene alrededor
+
 
 % Metodo EdR --------------------------------------------------
 \begin{proc}{EdR}
@@ -80,13 +85,13 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 }{
 \Tipo{EdR}
 }
-    \requiereLargo{aulaCuadrada(a) \yLuego \\ examenValido(solucion) \yLuego \\ cantValidaEstudiantes(a, cantEstudiantes) }
+    \requiereLargo{aulaCuadrada(a) \yLuego \\ aulaVacia(a) \yLuego \\ examenValido(solucion) \yLuego \\ cantValidaEstudiantes(a, cantEstudiantes) }
     \aseguraLargo{
         (\norm{res.aula} = \norm{a}) \yLuego
-    \\ (\paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego \norm{res.aula[i]} = \norm{a[i]}}) \yLuego
-    \\ (\paraTodo{j}{\Z}{0 \leq j < \norm{res.aula} \implicaLuego noHayAlumnosJuntos(res.aula[j])}) \yLuego
+    \\ aulaCuadrada(res.aula) \yLuego\\ (\paraTodo{i}{\Z}{0 \leq i < \norm{res.aula} \implicaLuego noHayAlumnosJuntos(res.aula[i])}) \yLuego
     \\ (cuantosEstudiantes(res.aula) = cantEstudiantes) \yLuego
-    \\ (res.solucion = s)
+    \\ (res.solucion = s) \yLuego \\ aulaVacia(res.entregas)
+    \\ \paraTodo{j}{\Z}{0 \leq j < \norm{a} \implicaLuego \paraTodo{k}{\Z}{0 \leq j < \norm{a[k]} \implicaLuego \norm{a[j][k]} \leq 1}}
     }
 \end{proc}
 
@@ -94,26 +99,25 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
     \paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego \norm{a[i]} = \norm{a}}
 }
 
+\predLargo{aulaVacia}{a: Aula}{
+    \paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego \paraTodo{j}{\Z}{0 \leq j < \norm{a[j]} \implicaLuego \norm{a[i][j]} = 0}}
+}
+
 \predLargo{examenValido}{s: Examen}{
-    (True) % Obviamente hay que completar esto XD
+    \paraTodo{i}{\Z}{0 \leq i < \norm{s} \implicaLuego s[i] \in \conj{"0","1","2","3","4","5","6","7","8","9","\phantom0"}}
 }
 
 \predLargo{cantValidaEstudiantes}{a: Aula, e: \Z}{
-    ifthenelse(esPar(\norm{a}^ 2), \frac{\norm{a}^ 2}{2}, \frac{\norm{a}^ 2 + 1}{2})   
+    e \leq ifthenelse(esPar(\norm{a}), \frac{\norm{a}^ 2}{2}, \frac{\norm{a[0]} + 1}{2} * \norm{a})   
 }
 
-% Cree el predicado, lo adapté a la modularización y le cambié algo que era redundante.
-% Fijense que tuve que pones que fila es del tipo Array de Examen, podríamos hacer que sea tipo Fila?
 \predLargo{noHayAlumnosJuntos}{fila: \seq{Examen}}{
-    \paraTodo{i}{\Z}{0 <= i < \norm{fila}-1 \implicaLuego (hayAlumno(fila[i]) \implica \neg(hayAlumno(fila[i + 1])))}
+    \paraTodo{i}{\Z}{0 \leq i < \norm{fila}-1 \implicaLuego (\norm{fila[i]} > 0 \implica \norm{fila[i + 1]} = 0)}
 }
 
-% Así estaba antes, lo dejo por sí no estan de acuerdo con el cambio XD
-% \paraTodo{j}{\Z}{0 < j < \norm{aula[i]}-1 \implicaLuego (hayAlumno(aula[i][j]) \implica \neg (hayAlumno(aula[i][j-1]) \lor hayAlumno(aula[i][j+1])))}
-
-\predLargo{cuantosEstudiantes}{a: Aula}{
-    (True) % Obviamente hay que completar esto XD
-}
+\aux{cuantosEstudiantes}{a: Aula}{\Z}
+    $\sum_{i=0}^{\norm{a}-1} \sum_{j=0}^{\norm{a[i]}-1} IfThenElse(\norm{a[i][j]} > 0,1,0)$
+    \\
 
 % Metodo igualdad --------------------------------------------------
 \begin{proc}{igualdad}
@@ -124,8 +128,9 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 }
     \requiere{True}
     \aseguraLargo{(res = True) \leftrightarrow
-    \\ (edr1.aula = edr2.aula) \yLuego
-    \\ (edr1.solucion = edr2.solucion)
+    \\ (edr1.aula = edr2.aula) \land
+    \\ (edr1.solucion = edr2.solucion) \land
+    \\ (edr1.entregas = edr2.entregas)
     }
 \end{proc}
 

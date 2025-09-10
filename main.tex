@@ -56,7 +56,8 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 
 % RENOMBRE DE TIPOS --------------------------------------------------
 
-% Aula: Seq(Seq(Seq(Examen))) - Doble secuencia para representar
+% Aula: Seq(Seq(Estudiante)) - Doble secuencia para representar
+% Estudiante: Seq(Examen)
 % Nota: Int
 % Examen: Seq(Char) 
 
@@ -74,34 +75,33 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 \obs{entregas}{Aula}
 \\
 % Agrego el obs entregas porque es necesario ir guardando los examenes que entregan los alumnos con el proc "entregar". La idea sería que arranca como un aula vacía. Cuando el aulmno [i][j] entrega, en el aula original ese asiento queda vacío, y en el aula de entregas, ese asiento guarda la última instancia del examen (la que tiene todas las respuestas marcadas). Así, es muy fácil al final chequear si se copió con los que tiene alrededor
-
-
+% dado se copia un ejercicio que a´un no 
 % Metodo EdR --------------------------------------------------
 \begin{proc}{EdR}
 {
-\In a: Aula,
-\In f: \Z,
-\In c: \Z,
+\In dimensionAula: \Z,
 \In s: Examen,
 \In cantEstudiantes: \Z
 }{
 \Tipo{EdR}
 }
     \requiereLargo{
-        (f = c) \yLuego
-    \\ aulaVacia(a) \yLuego 
-    \\ examenValido(solucion) \yLuego 
-    \\ cantValidaEstudiantes(a, cantEstudiantes) }
+        (dimensionAula > 0) \yLuego
+    \\ examenValido(solucion) \yLuego
+    \\ cantValidaEstudiantes(dimensionAula, cantEstudiantes)}
+    % Agregar asegura que todos los examenes que esten, esten en blancos
     \aseguraLargo{
-        (\norm{res.aula} = \norm{a}) \yLuego
+        (\norm{res.aula} = dimensionAula) \yLuego
     \\ aulaCuadrada(res.aula) \yLuego
     \\ (\paraTodo{i}{\Z}{0 \leq i < \norm{res.aula} \implicaLuego noHayAlumnosJuntos(res.aula[i])}) \yLuego
     \\ (cuantosEstudiantes(res.aula) = cantEstudiantes) \yLuego
     \\ (res.solucion = s) \yLuego 
-    \\ aulaVacia(res.entregas)
-    \\ \paraTodo{j}{\Z}{0 \leq j < \norm{a} \implicaLuego \paraTodo{k}{\Z}{0 \leq j < \norm{a[k]} \implicaLuego \norm{a[j][k]} \leq 1}}
+    \\ aulaVacia(res.entregas) \yLuego 
+    \\ \paraTodo{j}{\Z}{0 \leq j < dimensionAula \implicaLuego \paraTodo{k}{\Z}{0 \leq j < \norm{res.aula[k]} \implicaLuego \norm{res.aula[j][k]} \leq 1}}
     }
 \end{proc}
+
+% Revisar preds y aux
 
 \predLargo{aulaCuadrada}{a: Aula}{
     \paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego \norm{a[i]} = \norm{a}}
@@ -112,7 +112,7 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 }
 
 \predLargo{examenValido}{s: Examen}{
-    \paraTodo{i}{\Z}{0 \leq i < \norm{s} \implicaLuego s[i] \in \conj{"0","1","2","3","4","5","6","7","8","9","\phantom0"}}
+    \paraTodo{i}{\Z}{0 \leq i < \norm{s} \implicaLuego s[i] \in \conj{"0","1","2","3","4","5","6","7","8","9",""}}
 }
 
 \predLargo{cantValidaEstudiantes}{a: Aula, e: \Z}{
@@ -145,16 +145,24 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 % Metodo copiarse --------------------------------------------------
 \begin{proc}{copiarse}
 {
-\In alumno: Estudiante % que pase las coordenadas o su examen? 
+\In alumno: Coordenada % que pase las coordenadas o su examen?
+\Inout aula: Aula
 }{
 \Tipo{EdR}
 }
-    \requiere{True} % Que el alumno exista (Vemos cómo ponerlo depende de cómo identificamos al alumno) y que tenga a alguien en frente o a dos asientos de distancia a los lados
-    \asegura{res} % aula[i][j].examen[4] (para la pregunta 4 por ejemplo) == aula[i+1][j].examen[4] o aula[i][j+2] o aula[i][j+3] o aula[i][j-2] o aula[i][j-3] (Chequear si existen esas coordenadas)
+    \requiereLargo{ 
+        \norm{aula[alumno.f][alumno.c]} > 0 
+        \\ (\exists i:Coordenada)(esAlumnoCercano(i, alumno) \land )
+        } % Que el alumno exista 
+    %(Vemos cómo ponerlo depende de cómo identificamos al alumno) y 
+    % que tenga a alguien en frente o a dos asientos de distancia a los lados
+    \asegura{res} % aula[i][j].examen[4] 
+    % (para la pregunta 4 por ejemplo) == aula[i+1][j].examen[4] 
+    % o aula[i][j+2] o aula[i][j+3] o aula[i][j-2] o aula[i][j-3] (Chequear si existen esas coordenadas)
 \end{proc}
 
 % Metodo publicarResolucion --------------------------------------------------
-\begin{proc}{publicarResolucion}
+\begin{proc}{consultarDarkWeb}
 {
 \In completar, Completar
 }{

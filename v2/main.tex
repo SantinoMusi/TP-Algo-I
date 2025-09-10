@@ -1,0 +1,231 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage[left=2.5cm,top=3cm,right=2.5cm,bottom=3cm,bindingoffset=0.5cm]{geometry}
+\usepackage{AEDLogica, AEDEspecificacion, AEDTADs}
+\usepackage{caratula}
+
+
+\titulo{Trabajo práctico}
+\subtitulo{Especificacion de TADs}
+
+\fecha{\today}
+
+\materia{Algoritmos y Estructuras de Datos}
+\grupo{BobElConstructorPorCopia}
+
+\integrante{Choque, Leandro}{252/25}{leandroch2002@gmail.com}
+\integrante{Musi, Santino}{965/24}{santinomusi1@gmail.com}
+\integrante{Rojas, Damian}{209/25}{dam.rojas1@gmail.com}
+\integrante{Martell, Juan Bautista}{622/25}{Juanbamartell@hotmail.com}
+% \integrante{Apellido, Nombre2}{002/01}{email2@dominio.com} %
+
+
+% Declaramos donde van a estar las figuras
+% No es obligatorio, pero suele ser comodo
+\graphicspath{{../static/}}
+
+% Asi pueden escribir nuevos comandos. 
+% Este por ejemplo asegura q los nombres 
+% que figuren con una tipografia diferenciada  
+\newcommand{\Tipo}[1]{\mathsf{#1}}
+% la sintaxis es \newcommand{\nombreDeLaMacro}[cantidadDeParametros]{Lo que va ser remplazado por el macro} 
+\newcommand{\norm}[1]{\vert #1\vert}
+
+% Empieza el documento
+\begin{document}
+
+\maketitle
+
+\section{Supongo que acá iría una descripción}
+
+Breve descripción.
+
+Luego veremos bien el formato, esto de momento es para tener un esqueleto.
+
+\section{Especificacion}
+
+% Acá arrancamos el TAD --------------------------------------------------
+\begin{tad}{EdR}
+
+% SECCIÓN DE DUDAS/COMENTARIOS --------------------------------------------------
+
+% Preguntar si estudiantes necesita nombre o identificación
+% Preguntar por \yLuego
+% Preguntar por igualdad(), si basta con '=' en arrays
+
+% RENOMBRE DE TIPOS --------------------------------------------------
+
+% Aula: Seq[Seq[Alumno]] - Doble secuencia para representar
+% Alumno: Struct {asiento: Coordenada, examen: Examen}
+% Coordenada: Struct{f:Z, c:Z}
+% Examen: seq[Paso]
+% Paso = Seq[Respuesta]
+% Respuesta: Char
+
+\obs{aula}{Aula}
+\\
+\obs{solucion}{Paso}
+\\
+\obs{entregas}{\seq{Alumno}}
+\\
+\\
+% Agrego el obs entregas porque es necesario ir guardando los examenes que entregan los alumnos con el proc "entregar". La idea sería que arranca como un aula vacía. Cuando el aulmno [i][j] entrega, en el aula original ese asiento queda vacío, y en el aula de entregas, ese asiento guarda la última instancia del examen (la que tiene todas las respuestas marcadas). Así, es muy fácil al final chequear si se copió con los que tiene alrededor
+% dado se copia un ejercicio que aun no 
+% Metodo EdR --------------------------------------------------
+\begin{proc}{EdR}
+{
+\In dimensionAula: \Z,
+\In s: Paso,
+\In cantEstudiantes: \Z
+}{
+\Tipo{EdR}
+}
+    \requiereLargo{
+        (dimensionAula > 0) \yLuego
+    \\ pasoValido(s) \yLuego
+    \\ cantValidaEstudiantes(dimensionAula, cantEstudiantes)}
+    % Agregar asegura que todos los examenes que esten, esten en blancos
+    \aseguraLargo{
+        (\norm{res.aula} = dimensionAula) \yLuego
+    \\ aulaCuadrada(res.aula) \yLuego
+    \\ noHayAlumnosJuntos(res.aula) \yLuego
+    \\ (cuantosEstudiantes(res.aula) = cantEstudiantes) \yLuego
+    \\ examenesSinResponder(res.aula) \yLuego
+    \\ (res.solucion = s) \yLuego 
+    \\ (res.entregas = \langle \rangle)
+    }
+\end{proc}
+
+% True si las respuestas del paso estan en el rango de opciones (o vacía)
+\predLargo{pasoValido}{s: Paso}{
+    \paraTodo{i}{\Z}{0 \leq i < \norm{s} \implicaLuego s[i] \in \conj{"0","1","2","3","4","5","6","7","8","9",""}}
+}
+
+% True si la cantidad de estudiantes a lo sumo no hace que haya alumnos juntos
+\predLargo{cantValidaEstudiantes}{a: Aula, e: \Z}{
+    (e \leq ifThenElseFi(esPar(\norm{a}), \frac{\norm{a}^ 2}{2}, \frac{\norm{a} + 1}{2} * \norm{a}))    
+}
+
+\pred{esPar}{a: \Z}{
+    (mod(a, 2) = 0)
+}
+
+\predLargo{aulaCuadrada}{a: Aula}{
+    \paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego \norm{a[i]} = \norm{a}}
+}
+
+% Ahora se fija si estan vacíos o no
+\predLargo{noHayAlumnosJuntos}{a: Aula}{
+    \paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego 
+    \\ \paraTodo{j}{\Z}{0 \leq j < \norm{a[i]}-1 \implicaLuego 
+    \\ (a[i][j] \neq \langle \rangle \implica a[i][j+1] = \langle \rangle)}}
+}
+
+% Tambien chequea por los vacios
+\aux{cuantosEstudiantes}{a: Aula}{\Z}
+    $\sum_{i=0}^{\norm{a}-1} \sum_{j=0}^{\norm{a[i]}-1} ifThenElseFi(a[i][j] \neq \langle \rangle,1,0)$
+
+% Agrego la funcionalidad de acceder al examen del alumno con el "." porque es struct
+\predLargo{examenesSinResponder}{a: Aula}{
+    \paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego \paraTodo{j}{\Z}{0 \leq j < \norm{a[i]} \implicaLuego examenSinResponder(a[i][j].examen)}}
+}
+
+% Es el complemento del pred de arriba, se fija que haya 1 paso solo de examen y que todas sus respuestas sean ""
+\predLargo{examenSinResponder}{e: Examen}{
+    (\norm{e} = 1 \land \paraTodo{i}{\Z}{0 \leq i < \norm{e} \implica e[0][i] = ""})
+}
+
+% Metodo igualdad --------------------------------------------------
+\begin{proc}{igualdad}
+{
+\In edr1,edr2: EdR,
+}{
+\Tipo{Bool}
+}
+    \requiere{True}
+    \aseguraLargo{(res = True) \leftrightarrow
+    \\ (edr1.aula = edr2.aula) \land
+    \\ (edr1.solucion = edr2.solucion) \land
+    \\ (edr1.entregas = edr2.entregas)
+    }
+\end{proc}
+
+% Metodo copiarse --------------------------------------------------
+\begin{proc}{copiarse}
+{
+\In alumno: Alumno, % que pase las coordenadas o su examen?
+\Inout aula: Aula 
+}{
+\Tipo{}
+}
+    \requiereLargo{ 
+        (\norm{aula[alumno.f][alumno.c]} > 0) \yLuego
+        \\ (\exists i:Coordenada)(esAlumnoCercano(i, alumno) \land )
+        } % Que el alumno exista 
+    %(Vemos cómo ponerlo depende de cómo identificamos al alumno) y 
+    % que tenga a alguien en frente o a dos asientos de distancia a los lados
+    \asegura{res} % aula[i][j].examen[4] 
+    % (para la pregunta 4 por ejemplo) == aula[i+1][j].examen[4] 
+    % o aula[i][j+2] o aula[i][j+3] o aula[i][j-2] o aula[i][j-3] (Chequear si existen esas coordenadas)
+\end{proc}
+
+% Metodo publicarResolucion --------------------------------------------------
+\begin{proc}{consultarDarkWeb}
+{
+\In completar, Completar
+}{
+\Tipo{EdR}
+}
+    \requiere{True}
+    \asegura{res}
+\end{proc}
+
+% Metodo resolver --------------------------------------------------
+\begin{proc}{resolver}
+{
+\In completar, Completar
+}{
+\Tipo{EdR}
+}
+    \requiere{True}
+    \asegura{res}
+\end{proc}
+
+% Metodo entregar --------------------------------------------------
+\begin{proc}{entregar}
+{
+\In alumno: Estudiante
+}{
+\Tipo{EdR}
+}
+    \requiere{True} % Que el alumno exista
+    \asegura{res} % que aula[i][j] pase a estar vacío? Es suficiente?
+\end{proc}
+
+% Metodo chequearCopias --------------------------------------------------
+\begin{proc}{chequearCopias}
+{
+\In completar, Completar % Creo que no recibe nada o recibe un EdR
+}{
+\Tipo{seq<Estudiante>}
+}
+    \requiere{True} % Si no recibe nada va True, a lo mejor recibe un EdR pero entonces también iría True, mientras sea un EdR válido sirve
+    \asegura{res} % Acá hay que ver cómo poner lo de propoción de rtas equivalentes a compañero cercano >60% y eso, cómo medirlo, o eso sería muy implementativo?
+    % Quedaría tipo, para todo alumno en aula, si esSimilarACercano(aula[i][j].examen) o esSimilarAAlumnado(aula[i][j].examen) entonces se concatena a la secuencia
+\end{proc}
+
+% Metodo corregir --------------------------------------------------
+\begin{proc}{corregir} 
+{ %Acá dice que tenemos que corregir los examenes de los que no fueron sospechosos de copiarse, pero no podemos llamar un proc adentro de otro, o no?
+\In completar, Completar
+}{
+\Tipo{seq<<estudiante, nota>>}
+}
+    \requiere{True}
+    \asegura{res}
+\end{proc}
+
+\end{tad}
+
+\end{document}

@@ -158,13 +158,26 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 }{
 \Tipo{}
 }
+    % la otra forma q teniamos de chequear se indefinia pq no chequeabamos q i, j esten en rango |a|
+    % y lo de chequear que tenga alumnos cercanos me parece mucho para el requiere
     \requiereLargo{ 
-        (\norm{edr.Aula[alumno.f][alumno.c]} > 0) \yLuego
-        \\ (\exists i,j:\Z)(esAlumnoCercano(edr.Aula[i][j], alumno) \yLuego (\exists k:\Z)(alumno.examen[\norm{alumno.examen}][k]=="" \land edr.Aula[i][j].examen[\norm{examen}][k]\neq""))
+        (perteneceAlumno(alumno, edr.aula) \yLuego
+        \\ edr = edr0 \yLuego
+        \\ alumno.cordenadas.x = x0 \yLuego
+        \\ alumno.cordenadas.y = y0 \yLuego
         } % Que el alumno exista 
-    %(Vemos cómo ponerlo depende de cómo identificamos al alumno) y 
-    % que tenga a alguien en frente o a dos asientos de distancia a los lados
-    \asegura{res} % aula[i][j].examen[4] 
+    % si las cordenadas estan en aula, son adyacentes a alumno y tienen un ejercicio resuelto q alumno no tiene, entonces alumno tiene la misma respuesta en edr0
+    \aseguraLargo{(\exists i, j: \Z)(cordenadasValidas(i, j, edr.Aula) \yLuego 
+    \\ adyacente(<i, j>, alumno.cordenadas) \yLuego
+    \\ (\exists k:\Z)(alumno.examen[\norm{alumno.examen}-1][k]="" \land
+    \\ edr.Aula[i][j].examen[\norm{examen}][k]\neq"" \land
+    \\ edr.Aula[i][j].examen[\norm{examen}][k] = edr0.Aula[x0][y0].examen[\norm{alumno.examen}][k])\yLuego
+    % si no es alumno entonces queda igual
+    \\ \paraTodo p \Z{\paraTodo q \Z{cordenadasValidas(p,q, edr0.Aula) \yLuego
+    \\ (x0 \neq p \land y0 \neq q) \implicaLuego edr.Aula[p][q] = edr0.Aula[p][q]}} \yLuego
+    \\ edr0.solucion = edr.solucion \yLuego % el resto esta igual
+    \\ edr0.entregas = edr.entregas
+    } % aula[i][j].examen[4] 
     % (para la pregunta 4 por ejemplo) == aula[i+1][j].examen[4] 
     % o aula[i][j+2] o aula[i][j+3] o aula[i][j-2] o aula[i][j-3] (Chequear si existen esas coordenadas)
 \end{proc}

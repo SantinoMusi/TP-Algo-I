@@ -83,7 +83,7 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 }
     \requiereLargo{
         (dimensionAula > 0) \yLuego
-    \\ pasoValido(s) \yLuego
+    \\ rtaValida(s) \yLuego
     \\ cantValidaEstudiantes(dimensionAula, cantEstudiantes)}
     % Agregar asegura que todos los examenes que esten, esten en blancos
     \aseguraLargo{
@@ -98,18 +98,18 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 \end{proc}
 
 % True si las respuestas del paso estan en el rango de opciones (o vacía)
-\predLargo{pasoValido}{s: Paso}{
-    \paraTodo{i}{\Z}{0 \leq i < \norm{s} \implicaLuego s[i] \in \conj{"0","1","2","3","4","5","6","7","8","9",""}}
+\predLargo{rtaValida}{s: Paso}{
+    \paraTodo{i}{\Z}{0 \leq i < \norm{s} \implicaLuego s[i] \in \conj{"0","1","2","3","4","5","6","7","8","9"}}
 }
 
 % True si la cantidad de estudiantes a lo sumo no hace que haya alumnos juntos
 \predLargo{cantValidaEstudiantes}{a: Aula, e: \Z}{
-    (e \leq ifThenElseFi(esPar(\norm{a}), \frac{\norm{a}^ 2}{2}, \frac{\norm{a} + 1}{2} * \norm{a}))    
+    (e \leq ifThenElseFi(mod(\norm{a},2)==0, \frac{\norm{a}^ 2}{2}, \frac{\norm{a} + 1}{2} * \norm{a}))    
 }
 
-\pred{esPar}{a: \Z}{
-    (mod(a, 2) = 0)
-}
+%\pred{esPar}{a: \Z}{
+%    (mod(a, 2) = 0)
+%}
 
 \predLargo{aulaCuadrada}{a: Aula}{
     \paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego \norm{a[i]} = \norm{a}}
@@ -154,13 +154,13 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 \begin{proc}{copiarse}
 {
 \In alumno: Alumno, % que pase las coordenadas o su examen?
-\Inout aula: Aula 
+\Inout edr: EdR 
 }{
 \Tipo{}
 }
     \requiereLargo{ 
-        (\norm{aula[alumno.f][alumno.c]} > 0) \yLuego
-        \\ (\exists i:Coordenada)(esAlumnoCercano(i, alumno) \land )
+        (\norm{edr.Aula[alumno.f][alumno.c]} > 0) \yLuego
+        \\ (\exists i,j:\Z)(esAlumnoCercano(edr.Aula[i][j], alumno) \yLuego (\exists k:\Z)(alumno.examen[\norm{alumno.examen}][k]=="" \land edr.Aula[i][j].examen[\norm{examen}][k]\neq""))
         } % Que el alumno exista 
     %(Vemos cómo ponerlo depende de cómo identificamos al alumno) y 
     % que tenga a alguien en frente o a dos asientos de distancia a los lados
@@ -172,29 +172,34 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 % Metodo publicarResolucion --------------------------------------------------
 \begin{proc}{consultarDarkWeb}
 {
-\In completar, Completar
-}{
-\Tipo{EdR}
-}
-    \requiere{True}
+\In s: Paso,
+\In posiblesAccesos: \Z,
+\Inout edr: EdR
+}{}
+    \requiereLargo{
+    rtaValida(s) \yLuego
+    \\posiblesAccesos \geq 0 \yLuego}
     \asegura{res}
 \end{proc}
 
 % Metodo resolver --------------------------------------------------
 \begin{proc}{resolver}
 {
-\In completar, Completar
+\In alumno: Coordenada,
+\Inout edr: EdR
 }{
-\Tipo{EdR}
+\Tipo{Paso}
 }
-    \requiere{True}
+    \requiereLargo{
+    (existeAlumno(alumno)) \yLuego
+    \\(\exists i:\Z)(0 \leq i < \norm{alumno.examen[0]} \yLuego alumno.examen[\norm{alumno.examen}][k]=="")}
     \asegura{res}
 \end{proc}
 
 % Metodo entregar --------------------------------------------------
 \begin{proc}{entregar}
 {
-\In alumno: Estudiante
+\In alumno: Coordenada
 }{
 \Tipo{EdR}
 }
@@ -205,9 +210,9 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 % Metodo chequearCopias --------------------------------------------------
 \begin{proc}{chequearCopias}
 {
-\In completar, Completar % Creo que no recibe nada o recibe un EdR
+\In alumnos: seq<Alumno> % Creo que no recibe nada o recibe un EdR
 }{
-\Tipo{seq<Estudiante>}
+\Tipo{seq<Alumno>}
 }
     \requiere{True} % Si no recibe nada va True, a lo mejor recibe un EdR pero entonces también iría True, mientras sea un EdR válido sirve
     \asegura{res} % Acá hay que ver cómo poner lo de propoción de rtas equivalentes a compañero cercano >60% y eso, cómo medirlo, o eso sería muy implementativo?
@@ -217,9 +222,9 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 % Metodo corregir --------------------------------------------------
 \begin{proc}{corregir} 
 { %Acá dice que tenemos que corregir los examenes de los que no fueron sospechosos de copiarse, pero no podemos llamar un proc adentro de otro, o no?
-\In completar, Completar
+\Inout edr, EdR
 }{
-\Tipo{seq<<estudiante, nota>>}
+\Tipo{seq<<Alumno, Nota>>}
 }
     \requiere{True}
     \asegura{res}

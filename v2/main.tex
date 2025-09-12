@@ -161,7 +161,7 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
     % la otra forma q teniamos de chequear se indefinia pq no chequeabamos q i, j esten en rango |a|
     % y lo de chequear que tenga alumnos cercanos me parece mucho para el requiere
     \requiereLargo{ 
-        (perteneceAlumno(alumno, edr.aula) \yLuego
+        perteneceAlumno(alumno, edr.aula) \yLuego
         \\ edr = edr0 \yLuego
         \\ alumno.Cordenada.x = x0 \yLuego
         \\ alumno.Cordenada.y = y0 \yLuego
@@ -171,10 +171,11 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
     \\ adyacente(<i, j>, alumno.Cordenada) \yLuego
     \\ (\exists k:\Z)(alumno.examen[\norm{alumno.examen}-1][k]="" \land
     \\ edr.Aula[i][j].examen[\norm{examen}][k]\neq"" \land
-    \\ edr.Aula[i][j].examen[\norm{examen}][k] = edr0.Aula[x0][y0].examen[\norm{alumno.examen}][k])\yLuego
+    \\ edr0.Aula[x0][y0] = copiarEjercicio(edr.Aula[i][j].examen, alumno) \yLuego
+    % edr.Aula[i][j].examen[\norm{examen}][k] = edr0.Aula[x0][y0].examen[\norm{alumno.examen}][k]))\yLuego
     % si no es alumno entonces queda igual
-    \\ \paraTodo p \Z{\paraTodo q \Z{cordenadaValida(p,q, edr0.Aula) \yLuego
-    \\ (x0 \neq p \land y0 \neq q) \implicaLuego edr.Aula[p][q] = edr0.Aula[p][q]}} \yLuego
+    \\ \paraTodo p \Z{\paraTodo q \Z{(cordenadaValida(p,q, edr0.Aula) \land x0 \neq p \land y0 \neq q) \implicaLuego 
+    \\ edr.Aula[p][q] = edr0.Aula[p][q]}} \yLuego
     % el resto esta igual
     \\ edr0.solucion = edr.solucion \yLuego 
     \\ edr0.entregas = edr.entregas

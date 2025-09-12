@@ -53,6 +53,7 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 % Preguntar si estudiantes necesita nombre o identificación
 % Preguntar por \yLuego
 % Preguntar por igualdad(), si basta con '=' en arrays
+% Preguntar por uso de metavariables como renombre de var interna
 
 % RENOMBRE DE TIPOS --------------------------------------------------
 
@@ -70,9 +71,9 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 \obs{entregas}{\seq{Alumno}}
 \\
 \\
-% Agrego el obs entregas porque es necesario ir guardando los examenes que entregan los alumnos con el proc "entregar". La idea sería que arranca como un aula vacía. Cuando el aulmno [i][j] entrega, en el aula original ese asiento queda vacío, y en el aula de entregas, ese asiento guarda la última instancia del examen (la que tiene todas las respuestas marcadas). Así, es muy fácil al final chequear si se copió con los que tiene alrededor
-% dado se copia un ejercicio que aun no 
-% Metodo EdR --------------------------------------------------
+
+% Metodo EDR --------------------------------------------------
+% Falta una forma de chequear que todos los alumnos tengan su cordenada
 \begin{proc}{EdR}
 {
 \In dimensionAula: \Z,
@@ -118,12 +119,12 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 % Ahora se fija si estan vacíos o no
 \predLargo{noHayAlumnosJuntos}{a: Aula}{
     \paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego 
-    \\ \paraTodo{j}{\Z}{0 \leq j < \norm{a[i]}-1 \implicaLuego (a[i][j] \neq \langle \rangle \implica a[i][j+1] = \langle \rangle)}}
+    \\ \paraTodo{j}{\Z}{0 \leq j < \norm{a[i]}-1 \implicaLuego (a[i][j].examen \neq \langle \rangle \implica a[i][j+1].examen = \langle \rangle)}}
 }
 
 % Tambien chequea por los vacios
 \aux{cuantosEstudiantes}{a: Aula}{\Z}
-    $\sum_{i=0}^{\norm{a}-1} \sum_{j=0}^{\norm{a[i]}-1} ifThenElseFi(a[i][j] \neq \langle \rangle,1,0)$
+    $\sum_{i=0}^{\norm{a}-1} \sum_{j=0}^{\norm{a[i]}-1} ifThenElseFi(a[i][j].examen \neq \langle \rangle,1,0)$
 
 % Agrego la funcionalidad de acceder al examen del alumno con el "." porque es struct
 \predLargo{examenesSinResponder}{a: Aula}{
@@ -132,7 +133,8 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 
 % Es el complemento del pred de arriba, se fija que haya 1 paso solo de examen y que todas sus respuestas sean ""
 \predLargo{examenSinResponder}{e: Examen}{
-    (\norm{e} = 1 \land \paraTodo{i}{\Z}{0 \leq i < \norm{e} \implica e[0][i] = ""})
+    (\norm{e} = 1 \land \paraTodo{i}{\Z}{0 \leq i < \norm{e[0]} \implica e[0][i] = ""}) \lor \norm{e} = 0
+    % agregue lo de |e| = 0 porque sino da false cuando no hay examen
 }
 
 % Metodo igualdad --------------------------------------------------
@@ -163,15 +165,15 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
     \requiereLargo{ 
         perteneceAlumno(alumno, edr.aula) \yLuego
         \\ edr = edr0 \yLuego
-        \\ alumno.Cordenada.x = x0 \yLuego
-        \\ alumno.Cordenada.y = y0 \yLuego
+        \\ alumno.asiento.x = x0 \yLuego
+        \\ alumno.asiento.y = y0 \yLuego
         } % Que el alumno exista 
     % si las cordenadas estan en aula, son adyacentes a alumno y tienen un ejercicio resuelto q alumno no tiene, entonces alumno tiene la misma respuesta en edr0
     \aseguraLargo{(\exists i, j: \Z)(cordenadaValidas(i, j, edr.Aula) \yLuego 
-    \\ adyacente(<i, j>, alumno.Cordenada) \yLuego
+    \\ adyacente(<i, j>, alumno.asiento) \yLuego
     \\ (\exists k:\Z)(alumno.examen[\norm{alumno.examen}-1][k]="" \land
     \\ edr.Aula[i][j].examen[\norm{examen}][k]\neq"" \land
-    \\ edr0.Aula[x0][y0] = copiarEjercicio(edr.Aula[i][j].examen, alumno) \yLuego
+    \\ edr0.Aula[x0][y0] = copiarEjercicio(edr.Aula[i][j].examen, alumno))) \yLuego
     % edr.Aula[i][j].examen[\norm{examen}][k] = edr0.Aula[x0][y0].examen[\norm{alumno.examen}][k]))\yLuego
     % si no es alumno entonces queda igual
     \\ \paraTodo p \Z{\paraTodo q \Z{(cordenadaValida(p,q, edr0.Aula) \land x0 \neq p \land y0 \neq q) \implicaLuego 
@@ -185,7 +187,7 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 % las cordenadas del alumno estan en el aula y el examen es el mismo
 \predLargo{perteneceAlumno}{e:alumno, a:Aula}{
     (\exists i, j:\Z)(cordenadaValida(<i,j>, edr.aula) \yLuego
-    \\ alumno.Cordenada.x = i \land alumno.Cordenada.y = j \yLuego
+    \\ alumno.asiento.x = i \land alumno.asiento.y = j \yLuego
     \\ alumno.examen = a[i][j].examen)
 }
 

@@ -202,9 +202,16 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 \Inout edr: EdR
 }{}
     \requiereLargo{
-    rtaValida(s) \yLuego
-    \\posiblesAccesos \geq 0 \yLuego}
-    \asegura{res}
+    edr = edr0 \yLuego
+    \\rtaValida(s) \yLuego
+    \\\norm{s} = \norm{edr.solucion}
+    \\0 \leq posiblesAccesos \leq cuantosEstudiantes(edr.aula)}
+    \aseguraLargo{
+    \existe {n}{\Z}{0 \leq n \leq posiblesAccesos} \implica
+    \\(\paraTodo {i}{\Z}{0 \leq i \leq n} \implicaLuego \existe {c_i}{Coordenada}{coordenadaValida(c_i,edr.aula) \land edr.aula[c_i.f][c_i.c] \neq <>} \implicaLuego
+    concat(edr.aula[c_i.f][c_i.c].examen,s)) \yLuego %está bien el concat?
+    \\edr.solucion = edr0.solucion \yLuego
+    \\edr.entregas = edr0.entregas}
 \end{proc}
 
 % Metodo resolver --------------------------------------------------

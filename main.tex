@@ -302,14 +302,20 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 
 % Metodo corregir --------------------------------------------------
 \begin{proc}{corregir} 
-{ %Acá dice que tenemos que corregir los examenes de los que no fueron sospechosos de copiarse, pero no podemos llamar un proc adentro de otro, o no?
-\Inout edr, EdR
+{
+\In edr:EdR,
+\In l:\seq{Alumno}
 }{
-\Tipo{seq<<Alumno, Nota>>}
+\Tipo{\seq{\tupla{Alumno, Nota}}}
 }
     \requiere{True}
-    \asegura{res}
+    \aseguraLargo{
+        \paraTodo{i, j}{\Z}{(coordenadaValidas(i, j, edr.Aula) \yLuego \neg (pertenece(edr[i][j], l))) \implicaLuego
+        \\ \paraTodo{k}{\Z}{0 \leq k < \norm{res} \implicaLuego res[k] = \tupla{edr[i][j], nota(edr[i][j], edr.s])}}}
+        }
 \end{proc}
+
+% Agregar pred pertenece y pred nota
 
 \end{tad}
 

@@ -111,6 +111,7 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
     \paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego \norm{a[i]} = \norm{a}}
 }
 
+% Ahora se fija si estan vacíos o no
 \predLargo{noHayAlumnosJuntos}{a: Aula}{
     \paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego 
     \\ \paraTodo{j}{\Z}{0 \leq j < \norm{a[i]}-1 \implicaLuego (a[i][j] \neq \langle \rangle \implica a[i][j+1] = \langle \rangle)}}
@@ -209,16 +210,62 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 % Metodo resolver --------------------------------------------------
 \begin{proc}{resolver}
 {
-\In alumno: Coordenada,
-\Inout edr: EdR
+\Inout edr: EdR,
+\In e: Alumno
 }{
-\Tipo{Paso}
+\Tipo{Examen}
 }
     \requiereLargo{
-    (existeAlumno(alumno)) \yLuego
-    \\(\exists i:\Z)(0 \leq i < \norm{alumno.examen[0]} \yLuego alumno.examen[\norm{alumno.examen}][k]=="")}
-    \asegura{res}
+    perteneceAlumno(e, edr.aula) \yLuego\\
+    hayPreguntaSinResponder(e.examen[\norm{e.examen}-1]) \yLuego\\
+    edr0 = edr
+    }
+    \aseguraLargo{
+        % vv el examen q devolvemos tiene t+1 pasos
+        \norm{res} = \norm{e.examen} + 1\yLuego\\
+        % aca me aseguro que en el paso t+1 resuelvo un ejercicio que en el paso t no estaba resuelto vv
+        (\exists k: \Z)(0 \leq k < \norm{e.examen[0]} \yLuego\\
+        mismosEjerciciosMenos(k, res[-1], e.examen[-1]) \land\\
+        \lnot respondio(k, e.examen[-1]) \land
+        respondio(k, res[-1]))\yLuego\\
+        % vv aca me fijo que el resto de pasos esten igual
+        mismosPasos(e.examen, res) \yLuego\\
+        % vv igualo el examen en edr con el examen q devuelvo
+        edr.aula[e.asiento.f][e.asiento.c].examen = res.examen\yLuego\\
+        % vv Todo el resto sigue igual
+        todosEstudiantesIgualesMenos(e.asiento, edr.aula, edr0.aula)\yLuego\\
+        edr0.solucion = edr.solucion \yLuego\\
+        edr0.entregas = edr.entregas
+    }
 \end{proc}
+
+
+\predLargo{hayPreguntaSinResponder}{p: Paso}{
+(\norm{p} > 0)\land(\exists i:\Z)(0 \leq i < \norm{x[0]} \yLuego p[\norm{p}][i]="")
+}
+
+\predLargo{mismosEjerciciosMenos}{i: \Z, p0, p1: Paso}{
+    \norm{p1} \leq \norm{p0} \yLuego\\
+    \paraTodo{j}{\Z}{(0 \leq j < \norm{p0} \land j \neq i)
+    \implicaLuego e0[j] = e1[j]}
+}
+
+\predLargo{mismospasos}{e0, e1: Examen}{
+    \norm{e1} \leq \norm{e0} \yLuego\\
+    \paraTodo{j}{\Z}{0 \leq j < \norm{e0}\implicaLuego
+    \paraTodo{i}{\Z}{0 \leq i < \norm{e0[i]\implicaLuego
+    e0[i][j]=e1[i][j]}}}
+}
+
+\predLargo{respondio}{i: \Z, p: Paso}{
+    (0 \leq i < \norm{p}) \yLuego\\
+    p[i]\in \conj{"0","1","2","3","4","5","6","7","8","9"}
+}
+\predLargo{todosEstudiantesIgualesMenos}{e: Coordenada, a0, a1: Aula}{
+        aulaCuadrada(a0)\land aulaCuadrada(a1)\land\\
+        \norm{a0} = \norm{a1}\land\\
+        \paraTodo{c}{Coordenada}{(coordenadaValida(c, a0) \land c \neq e) \implicaLuego a1[c.f][c.c] = a0[c.f][c.c]}
+}
 
 % Metodo entregar --------------------------------------------------
 \begin{proc}{entregar}

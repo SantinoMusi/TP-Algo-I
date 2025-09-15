@@ -279,18 +279,18 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 % Metodo entregar --------------------------------------------------
 \begin{proc}{entregar}
 {
-\In alumno: Alumno,
+\In a: Alumno,
 \Inout edr: EdR
 }{
 }
     \requiereLargo{
-        perteneceAlumno(alumno.Coordenada, edr.Aula) \yLuego
+        perteneceAlumno(a.Coordenada, edr.Aula) \yLuego
         \\ edr = edr0
     } 
     \aseguraLargo{
-        edr.entregas = edr0.entregas ++ \tupla{alumno.coordenada, alumno.examen[\norm{alumno.examen}-1]} \land
-        \\ edr.aula[alumno.coord.f][alumno.coord.c] = \langle \rangle \land
-        \\ \paraTodo {c1}{Coordenada} {coordenadaValida(c1) \yLuego c1 \neq alumno.coordenada \implicaLuego edr.aula[c1.f][c1.c] = edr0.aula[c1.f][c1.c]} \yLuego
+        edr.entregas = edr0.entregas ++ \tupla{a.coordenada, a.examen[\norm{a.examen}-1]} \land
+        \\ edr.aula[a.coordenada.f][a.coordenada.c] = \langle \rangle \land
+        \\ \paraTodo {c1}{Coordenada} {coordenadaValida(c1) \yLuego c1 \neq a.coordenada \implicaLuego edr.aula[c1.f][c1.c] = edr0.aula[c1.f][c1.c]} \yLuego
         \\ edr.solucion = edr0.solucion
         }
     

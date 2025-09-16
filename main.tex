@@ -170,25 +170,25 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
     \\ setAt(ultimoPasoExamen(c1,edr0),j,ultimoPasoExamen(c2,edr0)[j])) \yLuego
     %(\exists j:\Z)((edr[c1.f][c1.c][\norm{edr[c1.f][c1.c]}-2][j] = edr[c2.f][c2.c][\norm{edr[c2.f][c1.2]}-1][j] ) \land (edr[c1.f][c1.c][\norm{edr[c1.f][c1.c]}-2][j] = "")) \yLuego
     % \paraTodo m \Z {(0 \leq m <\norm{edr[c1.f][c1.c]}  \land  m \neq j) \implicaLuego edr[\norm{a1.examen}-1][m] = edr0.Aula[a1.coord.f][a1.coord.c][\norm{a1.examen}-1][m]} \yLuego
-    \\ \paraTodo {c3}{Coordenada}{(cordenadaValida(c3, edr0.Aula) \land c1.f \neq c3.f \lor c1.c \neq c3.c) \implicaLuego edr.Aula[c3.f][c3.c] = edr0.Aula[c3.f][c3.c]} \yLuego
+    \\ \paraTodo {c3}{Coordenada}{(coordenadaValida(c3, edr0.Aula) \land c1.f \neq c3.f \lor c1.c \neq c3.c) \implicaLuego edr.Aula[c3.f][c3.c] = edr0.Aula[c3.f][c3.c]} \yLuego
     % el resto esta igual
     \\ edr0.solucion = edr.solucion \yLuego 
     \\ edr0.entregas = edr.entregas
     } 
 \end{proc}
 
-% las cordenadas del alumno estan en el aula y el examen es el mismo
-\predLargo{perteneceAlumno}{coord:Coordenada, a:Aula}{
-    (cordenadaValida(coord, edr.aula) \yLuego
-    \\ a[i][j] \neq \langle \rangle)
+% las coordenadas del alumno estan en el aula y el examen es el mismo
+\predLargo{perteneceAlumno}{c:Coordenada, a:Aula}{
+    (coordenadaValida(c, edr.aula) \yLuego
+    \\ a[c.f][c.c] \neq \langle \rangle)
 }
 
-% x e y estan entre 0 y norma del aula, por ende la cordenada es valida 
-\pred{cordenadaValida}{c:Coordenada, a:Aula}{0 \leq c.f < \norm{a} \land 0 \leq c.c < \norm{a}}\\
+% x e y estan entre 0 y norma del aula, por ende la coordenada es valida 
+\pred{coordenadaValida}{c:Coordenada, a:Aula}{0 \leq c.f < \norm{a} \land 0 \leq c.c < \norm{a}}\\
 
-% las cordenadas estan dentro del aula y c0 esta a distancia |2| de c1 en x o esta directamente adelante en y
+% las coordenadas estan dentro del aula y c0 esta a distancia |2| de c1 en x o esta directamente adelante en y
 \predLargo{adyacentes}{c1, c2: Coordenada, a: Aula}{
-    cordenadaValida(c1, a) \land cordenadaValida(c2, a) \land
+    coordenadaValida(c1, a) \land coordenadaValida(c2, a) \land
     \\ ((\norm{c2.c - c1.c} = 2 \land c2.f = c1.f) \lor
     \\ (c2.c = c1.c \land  c2.f - c1.f = 1))
 } 
@@ -225,7 +225,7 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 }
     \requiereLargo{
     perteneceAlumno(a, edr.aula) \yLuego\\
-    hayPreguntaSinResponder(ultimoPasoExamen(a.coordenada, edr)) \yLuego\\
+    hayPreguntaSinResponder(ultimoPasoExamen(a.coord, edr)) \yLuego\\
     edr0 = edr
     }
     \aseguraLargo{
@@ -239,9 +239,9 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
         % vv aca me fijo que el resto de pasos esten igual
         mismosPasos(a.examen, res) \yLuego\\
         % vv igualo el examen en edr con el examen q devuelvo
-        edr.aula[a.coordenada.f][a.coordenada.c].examen = res\yLuego\\
+        edr.aula[a.coord.f][a.coord.c].examen = res\yLuego\\
         % vv Todo el resto sigue igual
-        todosEstudiantesIgualesMenos(a.coordenada, edr.aula, edr0.aula)\yLuego\\
+        todosEstudiantesIgualesMenos(a.coord, edr.aula, edr0.aula)\yLuego\\
         edr0.solucion = edr.solucion \yLuego\\
         edr0.entregas = edr.entregas
     }
@@ -270,7 +270,7 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
     p[i]\in \conj{"0","1","2","3","4","5","6","7","8","9"}
 }
 
-\predLargo{todosEstudiantesIgualesMenos}{e: Coordenada, a0, a1: Aula}{
+\predLargo{todosEstudiantesIgualesMenos}{c: Coordenada, a0, a1: Aula}{
         aulaCuadrada(a0)\land aulaCuadrada(a1)\land\\
         \norm{a0} = \norm{a1}\land\\
         \paraTodo{c}{Coordenada}{(coordenadaValida(c, a0) \land c \neq e) \implicaLuego a1[c.f][c.c] = a0[c.f][c.c]}
@@ -284,13 +284,13 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 }{
 }
     \requiereLargo{
-        perteneceAlumno(a.Coordenada, edr.Aula) \yLuego
+        perteneceAlumno(a.coord, edr.Aula) \yLuego
         \\ edr = edr0
     } 
     \aseguraLargo{
-        edr.entregas = edr0.entregas ++ \tupla{a.coordenada, a.examen[\norm{a.examen}-1]} \land
-        \\ edr.aula[a.coordenada.f][a.coordenada.c] = \langle \rangle \land
-        \\ \paraTodo {c1}{Coordenada} {coordenadaValida(c1) \yLuego c1 \neq a.coordenada \implicaLuego edr.aula[c1.f][c1.c] = edr0.aula[c1.f][c1.c]} \yLuego
+        edr.entregas = edr0.entregas ++ \tupla{a.coord, a.examen[\norm{a.examen}-1]} \land
+        \\ edr.aula[a.coord.f][a.coord.c] = \langle \rangle \land
+        \\ \paraTodo {c1}{Coordenada} {coordenadaValida(c1, edr.aula) \yLuego c1 \neq a.coord \implicaLuego edr.aula[c1.f][c1.c] = edr0.aula[c1.f][c1.c]} \yLuego
         \\ edr.solucion = edr0.solucion
         }
     
@@ -319,7 +319,8 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 }
     \requiere{True}
     \aseguraLargo{
-        \paraTodo{i, j}{\Z}{(coordenadaValidas(i, j, edr.Aula) \yLuego \neg (pertenece(edr[i][j], l))) \implicaLuego
+        % Cambiar como le paso las coordenadas: \paraTodo{c}{Coordenada}{coordenadaValida(c, edr.aula)}
+        \paraTodo{i, j}{\Z}{(coordenadaValida(i, j, edr.Aula) \yLuego \neg (pertenece(edr[i][j], l))) \implicaLuego
         \\ \paraTodo{k}{\Z}{0 \leq k < \norm{res} \implicaLuego res[k] = \tupla{edr[i][j], nota(edr[i][j], edr.s])}}}
         }
 \end{proc}

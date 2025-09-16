@@ -118,16 +118,17 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 }
 
 % Tambien chequea por los vacios
-\aux{cuantosEstudiantes}{a: Aula}{\Z}
+\aux{cuantosEstudiantes}{a: Aula}{\Z} \\
     $\sum_{i=0}^{\norm{a}-1} \sum_{j=0}^{\norm{a[i]}-1} ifThenElse(a[i][j] \neq \langle \rangle,1,0)$
 \\
+\\
 \predLargo{examenesSinResponder}{a: Aula}{
-    \paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego \paraTodo{j}{\Z}{0 \leq j < \norm{a[i]} \implicaLuego examenSinResponder(a[i][j])}}
+    \paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego \paraTodo{j}{\Z}{0 \leq j < \norm{a[i]} \land a[i][j] \neq <> \implicaLuego \\ examenSinResponder(a[i][j].examen)}}
 }
 
 % Es el complemento del pred de arriba, se fija que haya 1 paso solo de examen y que todas sus respuestas sean ""
 \predLargo{examenSinResponder}{e: Examen}{
-    (\norm{e} = 1 \land \paraTodo{i}{\Z}{0 \leq i < \norm{e[0]} \implica e[0][i] = ""}) \lor \norm{e} = 0
+    (\norm{e} = 1 \land \paraTodo{i}{\Z}{0 \leq i < \norm{e[0]} \implica e[0][i] = ""})
     % agregue lo de |e| = 0 porque sino da false cuando no hay examen
     % CHEQUEAR: PARA MI HAY QUE VER SI, HABIENDO UN EXAMEN, ES VACÍO. SI NO HAY EXAMEN ES OTRO ASUNTO.
 }
@@ -160,13 +161,13 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
         \\ perteneceAlumno(c2, edr.aula) \yLuego
         \\ edr = edr0 \yLuego
         \\ adyacentes(c1, c2, edr.aula) \yLuego
-        \\(\exists k:\Z)(ultimoPasoExamen(c1.edr.aula) = "" \land ultimoPasoExamen(c2.edr.aula) \neq "")
+        \\(\exists k:\Z)(ultimoPasoExamen(c1, edr) = "" \land ultimoPasoExamen(c2, edr) \neq "")
         %(\exists k:\Z)(edr[c1.f][c1.c][\norm{edr[c1.f][c1.c]}-1][k] = "" \land edr[c2.f][c2.c][\norm{edr[c2.f][c2.c]}-1][k] \neq "")
         } 
     \aseguraLargo{
     \norm{edr.aula[c1.f][c1.c]} = \norm{edr0.aula[c1.f][c1.c]} + 1 \yLuego
     \\ (\exists j:\Z)(ultimoPasoExamen(c1,edr0)[j] = "" \ \land \ ultimoPasoExamen(c2,edr0)[j] \neq "" \ \land \ ultimoPasoExamen(c1,edr) =
-    \\ setAt(ultimoPasoExamen(c1,edr0),j,ultimoPasoExamen(c2,edr0)[j]))
+    \\ setAt(ultimoPasoExamen(c1,edr0),j,ultimoPasoExamen(c2,edr0)[j])) \yLuego
     %(\exists j:\Z)((edr[c1.f][c1.c][\norm{edr[c1.f][c1.c]}-2][j] = edr[c2.f][c2.c][\norm{edr[c2.f][c1.2]}-1][j] ) \land (edr[c1.f][c1.c][\norm{edr[c1.f][c1.c]}-2][j] = "")) \yLuego
     % \paraTodo m \Z {(0 \leq m <\norm{edr[c1.f][c1.c]}  \land  m \neq j) \implicaLuego edr[\norm{a1.examen}-1][m] = edr0.Aula[a1.coord.f][a1.coord.c][\norm{a1.examen}-1][m]} \yLuego
     \\ \paraTodo {c3}{Coordenada}{(cordenadaValida(c3, edr0.Aula) \land c1.f \neq c3.f \lor c1.c \neq c3.c) \implicaLuego edr.Aula[c3.f][c3.c] = edr0.Aula[c3.f][c3.c]} \yLuego
@@ -192,7 +193,7 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
     \\ (c2.c = c1.c \land  c2.f - c1.f = 1))
 } 
 
-\aux{ultimoPasoExamen}{c:Coordenada, edr:EdR}{Examen} = \\ $ edr.aula[c.f][c.c].examen[\norm{examen}-1]$ \\
+\aux{ultimoPasoExamen}{c:Coordenada, edr:EdR}{Examen} \\ $ edr.aula[c.f][c.c].examen[\norm{examen}-1]$ \\
 
 % Metodo publicarResolucion --------------------------------------------------
 \begin{proc}{consultarDarkWeb}
@@ -205,9 +206,9 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
     edr = edr0 \yLuego
     \\rtaValida(s) \yLuego
     \\\norm{s} = \norm{edr.solucion}
-    \\0 \leq posiblesAccesos \leq cuantosEstudiantes(edr.aula)}
+    \\posiblesAccesos \geq 0}
     \aseguraLargo{
-    \existe {n}{\Z}{0 \leq n \leq posiblesAccesos} \implica
+    \existe {n}{\Z}{0 \leq n \leq posiblesAccesos \land 0 \leq n \leq cuantosEstudiantes(edr.aula)} \implica
     \\(\paraTodo {i}{\Z}{0 \leq i \leq n} \implicaLuego \existe {c_i}{Coordenada}{coordenadaValida(c_i,edr.aula) \land edr.aula[c_i.f][c_i.c] \neq <>} \implicaLuego
     concat(edr.aula[c_i.f][c_i.c].examen,s)) \yLuego %está bien el concat?
     \\edr.solucion = edr0.solucion \yLuego
@@ -218,29 +219,29 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 \begin{proc}{resolver}
 {
 \Inout edr: EdR,
-\In e: Alumno
+\In a: Alumno
 }{
 \Tipo{Examen}
 }
     \requiereLargo{
-    perteneceAlumno(e, edr.aula) \yLuego\\
-    hayPreguntaSinResponder(e.examen[\norm{e.examen}-1]) \yLuego\\
+    perteneceAlumno(a, edr.aula) \yLuego\\
+    hayPreguntaSinResponder(ultimoPasoExamen(a.coordenada, edr)) \yLuego\\
     edr0 = edr
     }
     \aseguraLargo{
         % vv el examen q devolvemos tiene t+1 pasos
-        \norm{res} = \norm{e.examen} + 1\yLuego\\
+        \norm{res} = \norm{a.examen} + 1\yLuego\\
         % aca me aseguro que en el paso t+1 resuelvo un ejercicio que en el paso t no estaba resuelto vv
-        (\exists k: \Z)(0 \leq k < \norm{e.examen[0]} \yLuego\\
-        mismosEjerciciosMenos(k, res[-1], e.examen[-1]) \land\\
-        \lnot respondio(k, e.examen[-1]) \land
+        (\exists k: \Z)(0 \leq k < \norm{a.examen[0]} \yLuego\\
+        mismosEjerciciosMenos(k, res[-1], a.examen[-1]) \land\\
+        \lnot respondio(k, a.examen[-1]) \land
         respondio(k, res[-1]))\yLuego\\
         % vv aca me fijo que el resto de pasos esten igual
-        mismosPasos(e.examen, res) \yLuego\\
+        mismosPasos(a.examen, res) \yLuego\\
         % vv igualo el examen en edr con el examen q devuelvo
-        edr.aula[e.asiento.f][e.asiento.c].examen = res.examen\yLuego\\
+        edr.aula[a.coordenada.f][a.coordenada.c].examen = res\yLuego\\
         % vv Todo el resto sigue igual
-        todosEstudiantesIgualesMenos(e.asiento, edr.aula, edr0.aula)\yLuego\\
+        todosEstudiantesIgualesMenos(a.coordenada, edr.aula, edr0.aula)\yLuego\\
         edr0.solucion = edr.solucion \yLuego\\
         edr0.entregas = edr.entregas
     }
@@ -248,26 +249,27 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 
 
 \predLargo{hayPreguntaSinResponder}{p: Paso}{
-(\norm{p} > 0)\land(\exists i:\Z)(0 \leq i < \norm{x[0]} \yLuego p[\norm{p}][i]="")
+(\exists i:\Z)(0 \leq i < \norm{p} \yLuego p[i]="")
 }
 
 \predLargo{mismosEjerciciosMenos}{i: \Z, p0, p1: Paso}{
-    \norm{p1} \leq \norm{p0} \yLuego\\
+    \norm{p1} = \norm{p0} \yLuego\\
     \paraTodo{j}{\Z}{(0 \leq j < \norm{p0} \land j \neq i)
-    \implicaLuego e0[j] = e1[j]}
+    \implicaLuego p0[j] = p1[j]}
 }
 
-\predLargo{mismospasos}{e0, e1: Examen}{
+\predLargo{mismosPasos}{e0, e1: Examen}{
     \norm{e1} \leq \norm{e0} \yLuego\\
     \paraTodo{j}{\Z}{0 \leq j < \norm{e0}\implicaLuego
-    \paraTodo{i}{\Z}{0 \leq i < \norm{e0[i]\implicaLuego
-    e0[i][j]=e1[i][j]}}}
+    \paraTodo{i}{\Z}{0 \leq i < \norm{e0[i]}}}\implicaLuego
+    e0[i][j]=e1[i][j]
 }
 
 \predLargo{respondio}{i: \Z, p: Paso}{
     (0 \leq i < \norm{p}) \yLuego\\
     p[i]\in \conj{"0","1","2","3","4","5","6","7","8","9"}
 }
+
 \predLargo{todosEstudiantesIgualesMenos}{e: Coordenada, a0, a1: Aula}{
         aulaCuadrada(a0)\land aulaCuadrada(a1)\land\\
         \norm{a0} = \norm{a1}\land\\
@@ -277,18 +279,18 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 % Metodo entregar --------------------------------------------------
 \begin{proc}{entregar}
 {
-\In alumno: Alumno,
+\In a: Alumno,
 \Inout edr: EdR
 }{
 }
     \requiereLargo{
-        perteneceAlumno(alumno.Coordenada, edr.Aula) \yLuego
+        perteneceAlumno(a.Coordenada, edr.Aula) \yLuego
         \\ edr = edr0
     } 
     \aseguraLargo{
-        edr.entregas = edr0.entregas ++ \tupla{alumno.coordenada, alumno.examen[\norm{alumno.examen}-1]} \land
-        \\ edr.aula[alumno.coord.f][alumno.coord.c] = \langle \rangle \land
-        \\ \paraTodo {c1}{Coordenada} {coordenadaValida(c1) \yLuego c1 \neq alumno.coordenada \implicaLuego edr.aula[c1.f][c1.c] = edr0.aula[c1.f][c1.c]} \yLuego
+        edr.entregas = edr0.entregas ++ \tupla{a.coordenada, a.examen[\norm{a.examen}-1]} \land
+        \\ edr.aula[a.coordenada.f][a.coordenada.c] = \langle \rangle \land
+        \\ \paraTodo {c1}{Coordenada} {coordenadaValida(c1) \yLuego c1 \neq a.coordenada \implicaLuego edr.aula[c1.f][c1.c] = edr0.aula[c1.f][c1.c]} \yLuego
         \\ edr.solucion = edr0.solucion
         }
     

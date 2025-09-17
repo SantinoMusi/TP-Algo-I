@@ -155,29 +155,25 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 
 \begin{proc}{copiarse}
 {
-\In c1, c2: Coordenada,
+\In c1,c2: Coordenada,
 \Inout edr: EdR 
 }{
 \Tipo{}
 }
     \requiereLargo{ 
         perteneceAlumno(c1, edr.aula) \yLuego
-        \\ perteneceAlumno(c2, edr.aula) \yLuego
-        \\ edr = edr0 \yLuego
-        \\ adyacentes(c1, c2, edr.aula) \yLuego
-        \\(\exists k:\Z)(ultimoPasoExamen(c1, edr) = "" \land ultimoPasoExamen(c2, edr) \neq "")
-        %(\exists k:\Z)(edr[c1.f][c1.c][\norm{edr[c1.f][c1.c]}-1][k] = "" \land edr[c2.f][c2.c][\norm{edr[c2.f][c2.c]}-1][k] \neq "")
-        } 
+        \\ perteneceAlumno(c2, edr.aula) \yLuego 
+        \\ enRango(c1, c2) \yLuego
+        \\ \existe{i}{\Z}{suExamen(c1, edr)[i] = "" \land suExamen(c2, edr)[i] \neq ""} \yLuego
+        \\ (edr_0 = edr)
+    } 
     \aseguraLargo{
-    \norm{edr.aula[c1.f][c1.c]} = \norm{edr0.aula[c1.f][c1.c]} + 1 \yLuego
-    \\ (\exists j:\Z)(ultimoPasoExamen(c1,edr0)[j] = "" \ \land \ ultimoPasoExamen(c2,edr0)[j] \neq "" \ \land \ ultimoPasoExamen(c1,edr) =
-    \\ setAt(ultimoPasoExamen(c1,edr0),j,ultimoPasoExamen(c2,edr0)[j])) \yLuego
-    %(\exists j:\Z)((edr[c1.f][c1.c][\norm{edr[c1.f][c1.c]}-2][j] = edr[c2.f][c2.c][\norm{edr[c2.f][c1.2]}-1][j] ) \land (edr[c1.f][c1.c][\norm{edr[c1.f][c1.c]}-2][j] = "")) \yLuego
-    % \paraTodo m \Z {(0 \leq m <\norm{edr[c1.f][c1.c]}  \land  m \neq j) \implicaLuego edr[\norm{a1.examen}-1][m] = edr0.Aula[a1.coord.f][a1.coord.c][\norm{a1.examen}-1][m]} \yLuego
-    \\ \paraTodo {c3}{Coordenada}{(coordenadaValida(c3, edr0.Aula) \land c1.f \neq c3.f \lor c1.c \neq c3.c) \implicaLuego edr.Aula[c3.f][c3.c] = edr0.Aula[c3.f][c3.c]} \yLuego
-    % el resto esta igual
-    \\ edr0.solucion = edr.solucion \yLuego 
-    \\ edr0.entregas = edr.entregas
+        \existe{j}{\Z}{(suExamen(c1, edr)[j] = "" \land suExamen(c2, edr)[j] \neq "") \implicaLuego
+        \\ suExamen(c1, edr) = setAt(suExamen(c1,edr_0, j, suExamen(c2, edr_0)[j]))} \yLuego
+        \\ \paraTodo{c3}{Coordenada}{(coordenadaValida(c3, edr.aula) \land c1 \neq c3) \implicaLuego
+        \\ edr.aula[c3.f][c3.c] = edr_0.aula[c3.f][c3.c]} \yLuego
+        \\ (edr_0.solucion = edr.solucion) \yLuego
+        \\ (edr_0.entregas = edr.entregas)
     } 
 \end{proc}
 
@@ -189,15 +185,17 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 % x e y estan entre 0 y norma del aula, por ende la coordenada es valida 
 \pred{coordenadaValida}{c:Coordenada, a:Aula}{0 \leq c.f < \norm{a} \land 0 \leq c.c < \norm{a}}\\
 
+% AHORA SE LLAMA EN RANGO PORQUE ADYACENTE SIGNIFICA OTRA COSA Y SE PUEDE MALINTERPRETAR
 % las coordenadas estan dentro del aula y c0 esta a distancia |2| de c1 en x o esta directamente adelante en y
-\predLargo{adyacentes}{c1, c2: Coordenada, a: Aula}{
+\predLargo{enRango}{c1, c2: Coordenada, a: Aula}{
     coordenadaValida(c1, a) \land coordenadaValida(c2, a) \land
     \\ ((\norm{c2.c - c1.c} = 2 \land c2.f = c1.f) \lor
     \\ (c2.c = c1.c \land  c2.f - c1.f = 1))
 }
 
-% YA NO NOS SIRVE MAS ESTE AUX YA QUE AHORA EXAMEN ES SU ULTIMO PASO
-% \aux{ultimoPasoExamen}{c:Coordenada, edr:EdR}{Examen} \\ $ edr.aula[c.f][c.c].examen[\norm{examen}-1]$ \\
+% SERIA EL REEMPLAZO DE ULTIMOPASOEXAMEN
+\aux{suExamen}{c1:Coordenada, edr:EdR}{Examen} \ $edr.aula.[c1.f][c1.c].examen$
+
 
 \section{proc publicarResolucion}
 % Metodo publicarResolucion --------------------------------------------------

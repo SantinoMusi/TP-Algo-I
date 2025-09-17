@@ -197,8 +197,8 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 \aux{suExamen}{c1:Coordenada, edr:EdR}{Examen} \ $edr.aula.[c1.f][c1.c].examen$
 
 
-\section{proc publicarResolucion}
-% Metodo publicarResolucion --------------------------------------------------
+\section{proc consultarDarkWeb}
+% Metodo consultarDarkWeb --------------------------------------------------
 \begin{proc}{consultarDarkWeb}
 {
 \In s: Examen,
@@ -211,12 +211,18 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
     \\\norm{s} = \norm{edr.solucion}
     \\posiblesAccesos \geq 0}
     \aseguraLargo{
-    \existe {n}{\Z}{0 \leq n \leq posiblesAccesos \land 0 \leq n \leq cuantosEstudiantes(edr.aula)} \implica
-    \\(\paraTodo {i}{\Z}{0 \leq i \leq n} \implicaLuego \existe {c_i}{Coordenada}{coordenadaValida(c_i,edr.aula) \land edr.aula[c_i.f][c_i.c] \neq <>} \implicaLuego
-    concat(edr.aula[c_i.f][c_i.c].examen,s)) \yLuego %está bien el concat?
+    \existe {n}{\Z}{0 \leq n \leq posiblesAccesos \land 0 \leq n \leq cuantosEstudiantes(edr.aula)} \yLuego
+    \\\existe {seCopian}{seq<Coordenada>}{\norm{seCopian} = n} \yLuego \\\paraTodo{c}{Coordenada}{c \in seCopian \implicaLuego \\(coordenadaValida(c,edr.aula) \land edr.aula[c.f][c.c] \neq <> \land\\
+    edr.aula[c.f][c.c].examen = s)} \yLuego
     \\edr.solucion = edr0.solucion \yLuego
-    \\edr.entregas = edr0.entregas}
+    \\edr.entregas = edr0.entregas \yLuego
+    \\todosEstudiantesIgualesMenos(seCopian,edr.aula, edr0.aula)}
 \end{proc}
+
+\predLargo{todosEstudiantesIgualesMenos}{coords: seq<Coordenada>, a0, a1: Aula}{
+        \norm{a0} = \norm{a1}\land\\
+        \paraTodo{c}{Coordenada}{(coordenadaValida(c, a0) \land c \notin coords) \implicaLuego a1[c.f][c.c] = a0[c.f][c.c]}
+}
 
 \section{proc resolver}
 % Metodo resolver --------------------------------------------------
@@ -248,7 +254,7 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
         % vv igualo el examen en edr con el examen q devuelvo
         edr.aula[a.coord.f][a.coord.c].examen = res\yLuego\\
         % vv Todo el resto sigue igual
-        todosEstudiantesIgualesMenos(a.coord, edr.aula, edr0.aula)\yLuego\\
+        todosEstudiantesIgualesMenos(<a.coord>, edr.aula, edr0.aula)\yLuego\\ %está bien la sintaxis de pasarle una secuencia solo con a.coord? cómo sería?
         edr0.solucion = edr.solucion \yLuego\\
         edr0.entregas = edr.entregas
     }
@@ -275,12 +281,6 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 \predLargo{respondio}{i: \Z, p: Examen}{
     (0 \leq i < \norm{p}) \yLuego\\
     p[i]\in \conj{"0","1","2","3","4","5","6","7","8","9"}
-}
-
-\predLargo{todosEstudiantesIgualesMenos}{c: Coordenada, a0, a1: Aula}{
-        aulaCuadrada(a0)\land aulaCuadrada(a1)\land\\
-        \norm{a0} = \norm{a1}\land\\
-        \paraTodo{c}{Coordenada}{(coordenadaValida(c, a0) \land c \neq e) \implicaLuego a1[c.f][c.c] = a0[c.f][c.c]}
 }
 
 \section{proc entregar}

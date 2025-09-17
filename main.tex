@@ -60,24 +60,22 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 % Aula: Seq[Seq[Alumno]] - Doble secuencia para representar
 % Alumno: Struct {coord: Coordenada, examen: Examen}
 % Coordenada: Struct{f:Z, c:Z}
-% Examen: seq[Paso]
-% Paso = Seq[Respuesta]
+% Examen: Seq[Respuesta]
 % Respuesta: Char
 % Nota: Z
 
 \obs{aula}{Aula}
 \\
-\obs{solucion}{Paso}
+\obs{solucion}{Examen}
 \\
-\obs{entregas}{\seq{\tupla{Coordenada, Paso}}}
-\\
-\\
+\obs{entregas}{\seq{\tupla{Coordenada, Examen}}}
 
+\section{proc EdR}
 % Metodo EdR --------------------------------------------------
 \begin{proc}{EdR}
 {
 \In dimensionAula: \Z,
-\In s: Paso,
+\In s: Examen,
 \In cantEstudiantes: \Z
 }{
 \Tipo{EdR}
@@ -97,8 +95,8 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
     }
 \end{proc}
 
-% True si las respuestas del paso estan en el rango de opciones
-\predLargo{rtaValida}{s: Paso}{
+% True si las respuestas del examen estan en el rango de opciones
+\predLargo{rtaValida}{s: Examen}{
     \paraTodo{i}{\Z}{0 \leq i < \norm{s} \implicaLuego s[i] \in \conj{"0","1","2","3","4","5","6","7","8","9"}}
 }
 
@@ -122,17 +120,19 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
     $\sum_{i=0}^{\norm{a}-1} \sum_{j=0}^{\norm{a[i]}-1} ifThenElse(a[i][j] \neq \langle \rangle,1,0)$
 \\
 \\
+
+% CAMBIE EL PARATODO CON UNA COORDENADA AHORA
 \predLargo{examenesSinResponder}{a: Aula}{
-    \paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego \paraTodo{j}{\Z}{0 \leq j < \norm{a[i]} \land a[i][j] \neq <> \implicaLuego \\ examenSinResponder(a[i][j].examen)}}
+    \paraTodo{c}{Coordenada}{(coordenadaValida(c, edr.aula) \yLuego a[c.x][c.y] \neq \langle \rangle) \implicaLuego 
+    \\ examenSinResponder(a[c.x][c.y].examen)}
 }
 
-% Es el complemento del pred de arriba, se fija que haya 1 paso solo de examen y que todas sus respuestas sean ""
+% CAMBIADO A SU VERSIÓN SIN PASOS
 \predLargo{examenSinResponder}{e: Examen}{
-    (\norm{e} = 1 \land \paraTodo{i}{\Z}{0 \leq i < \norm{e[0]} \implica e[0][i] = ""})
-    % agregue lo de |e| = 0 porque sino da false cuando no hay examen
-    % CHEQUEAR: PARA MI HAY QUE VER SI, HABIENDO UN EXAMEN, ES VACÍO. SI NO HAY EXAMEN ES OTRO ASUNTO.
+    \paraTodo{i}{\Z}{0 \leq i < \norm{e} \implicaLuego e[i] = ""}
 }
 
+\section{proc igualdad}
 % Metodo igualdad --------------------------------------------------
 \begin{proc}{igualdad}
 {
@@ -148,7 +148,11 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
     }
 \end{proc}
 
+\section{proc copiarse}
 % Metodo copiarse --------------------------------------------------
+
+% CAMBIAR EL METODO COPIARSE YA QUE NO EXISTE MAS ultimoPasoExamen()
+
 \begin{proc}{copiarse}
 {
 \In c1, c2: Coordenada,
@@ -191,14 +195,16 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
     coordenadaValida(c1, a) \land coordenadaValida(c2, a) \land
     \\ ((\norm{c2.c - c1.c} = 2 \land c2.f = c1.f) \lor
     \\ (c2.c = c1.c \land  c2.f - c1.f = 1))
-} 
+}
 
-\aux{ultimoPasoExamen}{c:Coordenada, edr:EdR}{Examen} \\ $ edr.aula[c.f][c.c].examen[\norm{examen}-1]$ \\
+% YA NO NOS SIRVE MAS ESTE AUX YA QUE AHORA EXAMEN ES SU ULTIMO PASO
+% \aux{ultimoPasoExamen}{c:Coordenada, edr:EdR}{Examen} \\ $ edr.aula[c.f][c.c].examen[\norm{examen}-1]$ \\
 
+\section{proc publicarResolucion}
 % Metodo publicarResolucion --------------------------------------------------
 \begin{proc}{consultarDarkWeb}
 {
-\In s: Paso,
+\In s: Examen,
 \In posiblesAccesos: \Z,
 \Inout edr: EdR
 }{}
@@ -215,7 +221,11 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
     \\edr.entregas = edr0.entregas}
 \end{proc}
 
+\section{proc resolver}
 % Metodo resolver --------------------------------------------------
+
+% ESTE PROC HAY QUE CAMBIARLO
+
 \begin{proc}{resolver}
 {
 \Inout edr: EdR,
@@ -248,11 +258,11 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 \end{proc}
 
 
-\predLargo{hayPreguntaSinResponder}{p: Paso}{
+\predLargo{hayPreguntaSinResponder}{p: Examen}{
 (\exists i:\Z)(0 \leq i < \norm{p} \yLuego p[i]="")
 }
 
-\predLargo{mismosEjerciciosMenos}{i: \Z, p0, p1: Paso}{
+\predLargo{mismosEjerciciosMenos}{i: \Z, p0, p1: Examen}{
     \norm{p1} = \norm{p0} \yLuego\\
     \paraTodo{j}{\Z}{(0 \leq j < \norm{p0} \land j \neq i)
     \implicaLuego p0[j] = p1[j]}
@@ -265,7 +275,7 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
     e0[i][j]=e1[i][j]
 }
 
-\predLargo{respondio}{i: \Z, p: Paso}{
+\predLargo{respondio}{i: \Z, p: Examen}{
     (0 \leq i < \norm{p}) \yLuego\\
     p[i]\in \conj{"0","1","2","3","4","5","6","7","8","9"}
 }
@@ -276,6 +286,7 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
         \paraTodo{c}{Coordenada}{(coordenadaValida(c, a0) \land c \neq e) \implicaLuego a1[c.f][c.c] = a0[c.f][c.c]}
 }
 
+\section{proc entregar}
 % Metodo entregar --------------------------------------------------
 \begin{proc}{entregar}
 {
@@ -288,7 +299,8 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
         \\ edr = edr0
     } 
     \aseguraLargo{
-        edr.entregas = edr0.entregas ++ \tupla{a.coord, a.examen[\norm{a.examen}-1]} \land
+        % CAMBIO EL a.examen, ANTES REVISABA EL ULTIMO PASO
+        edr.entregas = edr0.entregas ++ \tupla{a.coord, a.examen} \land
         \\ edr.aula[a.coord.f][a.coord.c] = \langle \rangle \land
         \\ \paraTodo {c1}{Coordenada} {coordenadaValida(c1, edr.aula) \yLuego c1 \neq a.coord \implicaLuego edr.aula[c1.f][c1.c] = edr0.aula[c1.f][c1.c]} \yLuego
         \\ edr.solucion = edr0.solucion
@@ -297,6 +309,7 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 
 \end{proc}
 
+\section{proc chequearCopias}
 % Metodo chequearCopias --------------------------------------------------
 \begin{proc}{chequearCopias}
 {
@@ -309,6 +322,7 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
     % Quedaría tipo, para todo alumno en aula, si esSimilarACercano(aula[i][j].examen) o esSimilarAAlumnado(aula[i][j].examen) entonces se concatena a la secuencia
 \end{proc}
 
+\section{proc corregir}
 % Metodo corregir --------------------------------------------------
 \begin{proc}{corregir} 
 {
@@ -332,8 +346,8 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 }
 
 % Suma todas las respuestas correctas, lo divide por la cantidad de respuestas y lo multiplica por 10 (standar)
-\aux{nota}{a: Alumno, s: Paso}{\Z}
-    \\ $((\sum_{i=0}^{\norm{s}}ifThenElse(a.examen[\norm{examen} - 1][i] = s[i], 1, 0)) \ / \ \norm{s}) \cdot 10$
+\aux{nota}{a: Alumno, sol: Examen}{\Z}
+    \\ $((\sum_{i=0}^{\norm{sol}}ifThenElse(a.examen[i] = sol[i], 1, 0)) \ / \ \norm{s}) \cdot 10$
 
 
 \end{tad}

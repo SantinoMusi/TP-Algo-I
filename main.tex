@@ -101,8 +101,8 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 }
 
 % True si la cantidad de estudiantes a lo sumo no hace que haya alumnos juntos
-\predLargo{cantValidaEstudiantes}{a: Aula, e: \Z}{
-    (e \leq ifThenElse(mod(\norm{a},2)==0, \frac{\norm{a}^ 2}{2}, \frac{\norm{a} + 1}{2} * \norm{a}))    
+\predLargo{cantValidaEstudiantes}{a: Aula, c: \Z}{
+    (c \leq ifThenElse(mod(\norm{a},2)=0, \frac{\norm{a}^ 2}{2}, \frac{\norm{a} + 1}{2} * \norm{a}))    
 }
 
 \predLargo{aulaCuadrada}{a: Aula}{
@@ -183,8 +183,7 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 
 % las coordenadas del alumno estan en el aula y el examen es el mismo
 \predLargo{perteneceAlumno}{c:Coordenada, a:Aula}{
-    (coordenadaValida(c, edr.aula) \yLuego
-    \\ a[c.f][c.c] \neq \langle \rangle)
+    (coordenadaValida(c, edr.aula) \yLuego a[c.f][c.c] \neq \langle \rangle)
 }
 
 % x e y estan entre 0 y norma del aula, por ende la coordenada es valida 

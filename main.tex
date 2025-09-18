@@ -232,27 +232,29 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 \begin{proc}{resolver}
 {
 \Inout edr: EdR,
-\In a: Alumno
+\In a: Alumno,
+\In e: \seq{Examen}
 }{
 \Tipo{Examen}
 }
     \requiereLargo{
-    perteneceAlumno(a, edr.aula) \yLuego\\
-    hayPreguntaSinResponder(ultimoPasoExamen(a.coord, edr)) \yLuego\\
+    examenSinResponder(a.examen)\yLuego\\
+    \norm{e} > 0 \yLuego\\
+    perteneceAlumno(a, edr.aula)\yLuego\\
     edr0 = edr
     }
     \aseguraLargo{
         % vv el examen q devolvemos tiene t+1 pasos
-        \norm{res} = \norm{a.examen} + 1\yLuego\\
+        \norm{res} = \norm{e} + 1\yLuego\\
         % aca me aseguro que en el paso t+1 resuelvo un ejercicio que en el paso t no estaba resuelto vv
-        (\exists k: \Z)(0 \leq k < \norm{a.examen[0]} \yLuego\\
-        mismosEjerciciosMenos(k, res[-1], a.examen[-1]) \land\\
-        \lnot respondio(k, a.examen[-1]) \land
-        respondio(k, res[-1]))\yLuego\\
+        (\exists k: \Z)(0 \leq k < \norm{e[0]} \yLuego\\
+        mismosEjerciciosMenos(k, res[\norm{res}-1], e[\norm{e}-1]) \land\\
+        \lnot respondio(k, e[\norm{e}-1]) \land
+        respondio(k, res[\norm{res}-1]))\yLuego\\
         % vv aca me fijo que el resto de pasos esten igual
-        mismosPasos(a.examen, res) \yLuego\\
+        mismosPasos(e, res) \yLuego\\
         % vv igualo el examen en edr con el examen q devuelvo
-        edr.aula[a.coord.f][a.coord.c].examen = res\yLuego\\
+        edr.aula[a.coord.f][a.coord.c].examen = res[\norm{res}-1]\yLuego\\
         % vv Todo el resto sigue igual
         todosEstudiantesIgualesMenos(\langle a.coord \rangle, edr.aula, edr0.aula)\yLuego\\ %está bien la sintaxis de pasarle una secuencia solo con a.coord? cómo sería?
         edr0.solucion = edr.solucion \yLuego\\

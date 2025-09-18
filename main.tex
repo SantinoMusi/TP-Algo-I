@@ -101,39 +101,40 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     }
 \end{proc}
 
-% True si las respuestas del examen estan en el rango de opciones
+% Las respuestas del examen estan en el rango de opciones
 \predLargo{rtaValida}{s: Examen}{
     \paraTodo{i}{\Z}{0 \leq i < \norm{s} \implicaLuego s[i] \in \conj{"0","1","2","3","4","5","6","7","8","9"}}
 }
 
-% True si la cantidad de estudiantes a lo sumo no hace que haya alumnos juntos
+% La cantidad de estudiantes a lo sumo no hace que haya alumnos juntos
 \predLargo{cantValidaEstudiantes}{a: Aula, c: \Z}{
     (c \leq ifThenElse(mod(\norm{a},2)=0, \frac{\norm{a}^ 2}{2}, \frac{\norm{a} + 1}{2} * \norm{a}))    
 }
 
+% el aula tiene misma cantidad de filas y columnas
 \predLargo{aulaCuadrada}{a: Aula}{
     \paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego \norm{a[i]} = \norm{a}}
 }
 
-% Ahora se fija si estan vacíos o no
+% si hay un alumno en el asiento entonces, el que le sigue tiene que ser vacio
 \predLargo{noHayAlumnosJuntos}{a: Aula}{
     \paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego 
-    \\ \paraTodo{j}{\Z}{0 \leq j < \norm{a[i]}-1 \implicaLuego (a[i][j] \neq \langle \rangle \implica a[i][j+1] = \langle \rangle)}}
+    \\ \paraTodo{j}{\Z}{0 \leq j < \norm{a[i]}-1 \implicaLuego (a[i][j] = \langle \rangle \implica a[i][j+1] = \langle \rangle)}}
 }
 
-% Tambien chequea por los vacios
+% cuantos estudiantes hay en el aula
 \aux{cuantosEstudiantes}{a: Aula}{\Z} \\
     $\sum_{i=0}^{\norm{a}-1} \sum_{j=0}^{\norm{a[i]}-1} ifThenElse(a[i][j] \neq \langle \rangle,1,0)$
 \\
 \\
 
-% CAMBIE EL PARATODO CON UNA COORDENADA AHORA
+% todos los examenes en el aula estan sin responder
 \predLargo{examenesSinResponder}{a: Aula}{
     \paraTodo{c}{Coordenada}{(coordenadaValida(c, edr.aula) \yLuego a[c.x][c.y] \neq \langle \rangle) \implicaLuego 
     \\ examenSinResponder(a[c.x][c.y].examen)}
 }
 
-% CAMBIADO A SU VERSIÓN SIN PASOS
+% El examen no tiene ninguna respuesta
 \predLargo{examenSinResponder}{e: Examen}{
     \paraTodo{i}{\Z}{0 \leq i < \norm{e} \implicaLuego e[i] = ""}
 }
@@ -187,10 +188,9 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     (coordenadaValida(c, a) \yLuego a[c.f][c.c] \neq \langle \rangle)
 }
 
-% x e y estan entre 0 y norma del aula, por ende la coordenada es valida 
+% si c y f estan entre las dimensiones de aula la coordenada es valida 
 \pred{coordenadaValida}{c:Coordenada, a:Aula}{0 \leq c.f < \norm{a} \land 0 \leq c.c < \norm{a}}\\
 
-% AHORA SE LLAMA EN RANGO PORQUE ADYACENTE SIGNIFICA OTRA COSA Y SE PUEDE MALINTERPRETAR
 % las coordenadas estan dentro del aula y c0 esta a distancia |2| de c1 en x o esta directamente adelante en y
 \predLargo{enRango}{c1, c2: Coordenada, a: Aula}{
     coordenadaValida(c1, a) \land coordenadaValida(c2, a) \land
@@ -198,7 +198,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     \\ (c2.c = c1.c \land  c2.f - c1.f = 1))
 }
 
-% SERIA EL REEMPLAZO DE ULTIMOPASOEXAMEN
+% devuelve el examen del alumno en c1
 \aux{suExamen}{c1:Coordenada, edr:EdR}{Examen} \ $edr.aula.[c1.f][c1.c].examen$
 
 
@@ -225,6 +225,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     \\todosEstudiantesIgualesMenos(seCopian,edr.aula, edr_0.aula)}
 \end{proc}
 
+% si las 2 aulas comparten dimension -> todos los alumnos menos los que estan en la secuencia coords son el mismo
 \predLargo{todosEstudiantesIgualesMenos}{coords: \seq{Coordenada}, a0, a1: Aula}{
         \norm{a0} = \norm{a1}\land\\
         \paraTodo{c1}{Coordenada}{(coordenadaValida(c1, a0) \land \neg(c1 \in coords)) \implicaLuego a1[c1.f][c1.c] = a0[c1.f][c1.c]}
@@ -258,7 +259,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
         \lnot respondio(k, e[\norm{e}-1]) \land
         respondio(k, res[\norm{res}-1]))\yLuego\\
         % vv aca me fijo que el resto de pasos esten igual
-        mismosPasos(e, res) \yLuego\\
+        mismosPasos(res, e) \yLuego\\
         % vv igualo el examen en edr con el examen q devuelvo
         edr.aula[a.coord.f][a.coord.c].examen = res[\norm{res}-1]\yLuego\\
         % vv Todo el resto sigue igual
@@ -268,27 +269,30 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     }
 \end{proc}
 
-
-\predLargo{hayPreguntaSinResponder}{p: Examen}{
-(\exists i:\Z)(0 \leq i < \norm{p} \yLuego p[i]="")
+% Existe al menos una pregunta no resuelta en e
+\predLargo{hayPreguntaSinResponder}{e: Examen}{
+(\exists i:\Z)(0 \leq i < \norm{e} \yLuego e[i]="")
 }
 
-\predLargo{mismosEjerciciosMenos}{i: \Z, p0, p1: Examen}{
-    \norm{p1} = \norm{p0} \yLuego\\
-    \paraTodo{j}{\Z}{(0 \leq j < \norm{p0} \land j \neq i)
-    \implicaLuego p0[j] = p1[j]}
+% los examenes tienen misma cant de ejercicios y son todos iguales menos i (creo que la primera parte se puede sacar)
+\predLargo{mismosEjerciciosMenos}{i: \Z, e0, e1: Examen}{
+    \norm{e1} = \norm{e0} \yLuego\\
+    \paraTodo{j}{\Z}{(0 \leq j < \norm{e0} \land j \neq i)
+    \implicaLuego e0[j] = e1[j]}
 }
 
-%\predLargo{mismosPasos}{e0, e1: Examen}{
-%    \norm{e1} \leq \norm{e0} \yLuego\\
-%    \paraTodo{j}{\Z}{0 \leq j < \norm{e0}\implicaLuego
-%    \paraTodo{i}{\Z}{0 \leq i < \norm{e0[i]}}}\implicaLuego
-%    e0[i][j]=e1[i][j]
-%}
+% todos los pasos en p0 y p1 son iguales menos los ultimos en p0
+\predLargo{mismosPasos}{p0, p1: \seq{Examen}}{
+   \norm{p1} \leq \norm{p0} \yLuego\\
+   \paraTodo{j}{\Z}{0 \leq j < \norm{p0}\implicaLuego
+   \paraTodo{i}{\Z}{0 \leq i < \norm{p0[i]}}}\implicaLuego
+   p0[i][j]=p1[i][j]
+}
 
-\predLargo{respondio}{i: \Z, p: Examen}{
-    (0 \leq i < \norm{p}) \yLuego\\
-    p[i]\in \conj{"0","1","2","3","4","5","6","7","8","9"}
+% i es un indice de examen y el valor del examen en i es una respuesta valida
+\predLargo{respondio}{i: \Z, e: Examen}{
+    (0 \leq i < \norm{e}) \yLuego\\
+    e[i]\in \conj{"0","1","2","3","4","5","6","7","8","9"}
 }
 
 \section{proc entregar}
@@ -324,18 +328,20 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 }
     \requiere{True} 
     \aseguraLargo{
-        \paraTodo {a_1}{Alumno}{(a_1 \in edr.entregas) \implicaLuego ((a_1 \in res) \leftrightarrow 
-        \\ (\existe{a_2}{Alumno}{a_2 \in edr.entregas  \land  enRango(a_1.coord, a_2.coord, edr.aula) \land 
-        \\ porcentajeRespuestasIgualAdyacente(a_1, a_2) > 60} \ \lor \\porcentajeIgualAula(a_1, edr.entregas) > 25))}
+        \paraTodo {a1}{Alumno}{(a1 \in edr.entregas) \implicaLuego ((a1 \in res) \leftrightarrow 
+        \\ (\existe{a2}{Alumno}{a2 \in edr.entregas  \land  enRango(a1.coord, a2.coord, edr.aula) \land 
+        \\ porcentajeRespuestasIgualAdyacente(a1, a2) > 60} \ \lor \\porcentajeIgualAula(a1, edr.entregas) > 25))}
 }
 \end{proc}
 
-\aux{porcentajeRespuestasIgualAdyacente}{a_1, a_2: Alumno}{\Z}
-\\    $\frac{\sum_{i=0}^{\norm{a_1.examen}-1} IfThenElse(a_1.examen[i] = a_2.examen[i],1,0) \cdot 100}{\norm{a_1.examen}}$
+% devuelve el porcentaje de respuestas iguales entre 2 alumnos
+\aux{porcentajeRespuestasIgualAdyacente}{a1, a2: Alumno}{\Z}
+\\    $\frac{\sum_{i=0}^{\norm{a1.examen}-1} IfThenElse(a1.examen[i] = a2.examen[i],1,0) \cdot 100}{\norm{a1.examen}}$
 \\
 
-\aux{porcentajeIgualAula}{a_1:Alumno, entregas:\seq{Alumno}}{\Z}
-\\    $\frac{\sum_{i=0}^{\norm{entregas}-1}IfThenElse(a_1.examen = entregas[i].examen,1,0) \cdot 100}{\norm{entregas}}$
+% devuelve el porcentaje de alumnos que tienen el mismo examen que a1 en una secuencia
+\aux{porcentajeIgualAula}{a1:Alumno, entregas:\seq{Alumno}}{\Z}
+\\    $\frac{\sum_{i=0}^{\norm{entregas}-1}IfThenElse(a1.examen = entregas[i].examen,1,0) \cdot 100}{\norm{entregas}}$
 \\
 \\
 \\
@@ -358,8 +364,8 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     }
 \end{proc}
 
-% Agregar pred pertenece y aux nota
 
+% el alumno pertenece a la secuencia
 \predLargo{pertenece}{a: Alumno, l: \seq{Alumno}}{
     \paraTodo{i}{\Z}{0 \leq i < \norm{l} \implicaLuego l[i] = a}
 }

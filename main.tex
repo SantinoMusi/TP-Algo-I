@@ -51,6 +51,7 @@ $Examen\ ES\ \seq{Respuesta}$\\
 $Coordenada\ ES\ \struct{f:\Z, c:\Z}$\\
 $Alumno\ ES\ \struct{coord:Coordenada, examen:Examen}$\\
 $Aula\ ES\ \seq{\seq{Alumno}}$\\
+\\
 % Acá arrancamos el TAD --------------------------------------------------
 \begin{tad}{EdR}
 
@@ -119,7 +120,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 % si hay un alumno en el asiento entonces, el que le sigue tiene que ser vacio
 \predLargo{noHayAlumnosJuntos}{a: Aula}{
     \paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego 
-    \\ \paraTodo{j}{\Z}{0 \leq j < \norm{a[i]}-1 \implicaLuego (a[i][j] = \langle \rangle \implica a[i][j+1] = \langle \rangle)}}
+    \\ \paraTodo{j}{\Z}{0 \leq j < \norm{a[i]}-1 \implicaLuego (a[i][j] \neq \langle \rangle \implica a[i][j+1] = \langle \rangle)}}
 }
 
 % cuantos estudiantes hay en el aula
@@ -336,15 +337,12 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 
 % devuelve el porcentaje de respuestas iguales entre 2 alumnos
 \aux{porcentajeRespuestasIgualAdyacente}{a1, a2: Alumno}{\Z}
-\\    $\frac{\sum_{i=0}^{\norm{a1.examen}-1} IfThenElse(a1.examen[i] = a2.examen[i],1,0) \cdot 100}{\norm{a1.examen}}$
+\\    $(\sum_{i=0}^{\norm{a1.examen}-1} IfThenElse(a1.examen[i] = a2.examen[i],1,0)) \cdot \frac{100}{\norm{a1.examen}}$
 \\
 
 % devuelve el porcentaje de alumnos que tienen el mismo examen que a1 en una secuencia
 \aux{porcentajeIgualAula}{a1:Alumno, entregas:\seq{Alumno}}{\Z}
-\\    $\frac{\sum_{i=0}^{\norm{entregas}-1}IfThenElse(a1.examen = entregas[i].examen,1,0) \cdot 100}{\norm{entregas}}$
-\\
-\\
-\\
+\\ $(\sum_{i=0}^{\norm{entregas}-1}IfThenElse(a1.examen = entregas[i].examen,1,0)) \cdot \frac{100}{\norm{entregas}}$
 \\
 
 \section{proc corregir}
@@ -352,28 +350,20 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 \begin{proc}{corregir} 
 {
 \In edr:EdR,
-\In l:\seq{Alumno}
+\In sospechosos:\seq{Alumno}
 }{
 \Tipo{\seq{\tupla{Alumno, Nota}}}
 }
     \requiere{True}
     \aseguraLargo{
-        % Cambiar como le paso las coordenadas: \paraTodo{c}{Coordenada}{coordenadaValida(c, edr.aula)}
-        \paraTodo{c}{Coordenada}{(coordenadaValida(c, edr.aula) \yLuego \neg (pertenece(edr.aula[c.x][c.y], l))) \implicaLuego
-        \paraTodo{k}{\Z}{0 \leq k < \norm{res} \implicaLuego res[k] = \tupla{edr.aula[c.x][c.y], nota(edr.aula[c.x][c.y], edr.s)}}}
+        \paraTodo{i}{\Z}{(0 \leq i < \norm{edr.entregas} \yLuego \lnot (edr.entregas[i] \in sospechosos)) \implica
+        \\ (\tupla{edr.entregas[i], nota(edr.entregas[i], edr.solucion)} \in res)}
     }
 \end{proc}
 
-
-% el alumno pertenece a la secuencia
-\predLargo{pertenece}{a: Alumno, l: \seq{Alumno}}{
-    \paraTodo{i}{\Z}{0 \leq i < \norm{l} \implicaLuego l[i] = a}
-}
-
 % Suma todas las respuestas correctas, lo divide por la cantidad de respuestas y lo multiplica por 10 (standar)
 \aux{nota}{a: Alumno, sol: Examen}{\Z}
-    \\ $((\sum_{i=0}^{\norm{sol}}ifThenElse(a.examen[i] = sol[i], 1, 0)) \ / \ \norm{s}) \cdot 10$
-
+    \\ $((\sum_{i=0}^{\norm{sol}-1}ifThenElse(a.examen[i] = sol[i], 1, 0))) \cdot \frac{10}{\norm{sol}}$
 
 \end{tad}
 

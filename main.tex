@@ -68,7 +68,7 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 \\
 \obs{solucion}{Examen}
 \\
-\obs{entregas}{\seq{\tupla{Coordenada, Examen}}}
+\obs{entregas}{\seq{Alumno}}
 
 \section{proc EdR}
 % Metodo EdR --------------------------------------------------
@@ -168,10 +168,9 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
         \\ (edr_0 = edr)
     } 
     \aseguraLargo{
-        \existe{j}{\Z}{(suExamen(c1, edr)[j] = "" \land suExamen(c2, edr)[j] \neq "") \implicaLuego
-        \\ suExamen(c1, edr) = setAt(suExamen(c1,edr_0, j, suExamen(c2, edr_0)[j]))} \yLuego
-        \\ \paraTodo{c3}{Coordenada}{(coordenadaValida(c3, edr.aula) \land c1 \neq c3) \implicaLuego
-        \\ edr.aula[c3.f][c3.c] = edr_0.aula[c3.f][c3.c]} \yLuego
+        \existe{j}{\Z}{(suExamen(c1, edr_0)[j] = "" \land suExamen(c2, edr_0)[j] \neq "") \yLuego
+        \\ suExamen(c1, edr) = setAt(suExamen(c1,edr_0), j, suExamen(c2, edr_0)[j])} \yLuego
+        \\ todosEstudiantesIgualesMenos(\seq{c1},edr.aula,edr0.aula)\yLuego %PREGUNTAR SI ESTA SINTAXIS DE SEQ ESTÁ BIEN
         \\ (edr_0.solucion = edr.solucion) \yLuego
         \\ (edr_0.entregas = edr.entregas)
     } 
@@ -179,7 +178,7 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 
 % las coordenadas del alumno estan en el aula y el examen es el mismo
 \predLargo{perteneceAlumno}{c:Coordenada, a:Aula}{
-    (coordenadaValida(c, edr.aula) \yLuego a[c.f][c.c] \neq \langle \rangle)
+    (coordenadaValida(c, a) \yLuego a[c.f][c.c] \neq \langle \rangle)
 }
 
 % x e y estan entre 0 y norma del aula, por ende la coordenada es valida 
@@ -206,22 +205,23 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 \Inout edr: EdR
 }{}
     \requiereLargo{
-    edr = edr0 \yLuego
+    edr = edr_0 \yLuego
     \\rtaValida(s) \yLuego
-    \\\norm{s} = \norm{edr.solucion}
+    \\\norm{s} = \norm{edr.solucion} \yLuego
     \\posiblesAccesos \geq 0}
     \aseguraLargo{
-    \existe {n}{\Z}{0 \leq n \leq posiblesAccesos \land 0 \leq n \leq cuantosEstudiantes(edr.aula)} \yLuego
-    \\\existe {seCopian}{seq<Coordenada>}{\norm{seCopian} = n} \yLuego \\\paraTodo{c}{Coordenada}{c \in seCopian \implicaLuego \\(coordenadaValida(c,edr.aula) \land edr.aula[c.f][c.c] \neq <> \land\\
-    edr.aula[c.f][c.c].examen = s)} \yLuego
-    \\edr.solucion = edr0.solucion \yLuego
-    \\edr.entregas = edr0.entregas \yLuego
-    \\todosEstudiantesIgualesMenos(seCopian,edr.aula, edr0.aula)}
+    \existe {n}{\Z}{0 \leq n \leq posiblesAccesos \land 0 \leq n \leq cuantosEstudiantes(edr.aula)} \land
+    \\\existe {seCopian}{seq\langle Coordenada \rangle}{\norm{seCopian} = n \yLuego \\\paraTodo{c1}{Coordenada}{c1 \in seCopian \implica \\(coordenadaValida(c1,edr.aula) \yLuego 
+    edr.aula[c1.f][c1.c] \neq \langle\rangle \yLuego\\
+    suExamen(c1,edr) = s)}} \yLuego
+    \\edr.solucion = edr_0.solucion \yLuego
+    \\edr.entregas = edr_0.entregas \yLuego
+    \\todosEstudiantesIgualesMenos(seCopian,edr.aula, edr_0.aula)}
 \end{proc}
 
-\predLargo{todosEstudiantesIgualesMenos}{coords: seq<Coordenada>, a0, a1: Aula}{
+\predLargo{todosEstudiantesIgualesMenos}{coords: \seq{Coordenada}, a0, a1: Aula}{
         \norm{a0} = \norm{a1}\land\\
-        \paraTodo{c}{Coordenada}{(coordenadaValida(c, a0) \land c \notin coords) \implicaLuego a1[c.f][c.c] = a0[c.f][c.c]}
+        \paraTodo{c1}{Coordenada}{(coordenadaValida(c1, a0) \land \neg(c1 \in coords)) \implicaLuego a1[c1.f][c1.c] = a0[c1.f][c1.c]}
 }
 
 \section{proc resolver}
@@ -254,7 +254,7 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
         % vv igualo el examen en edr con el examen q devuelvo
         edr.aula[a.coord.f][a.coord.c].examen = res\yLuego\\
         % vv Todo el resto sigue igual
-        todosEstudiantesIgualesMenos(<a.coord>, edr.aula, edr0.aula)\yLuego\\ %está bien la sintaxis de pasarle una secuencia solo con a.coord? cómo sería?
+        todosEstudiantesIgualesMenos(\langle a.coord \rangle, edr.aula, edr0.aula)\yLuego\\ %está bien la sintaxis de pasarle una secuencia solo con a.coord? cómo sería?
         edr0.solucion = edr.solucion \yLuego\\
         edr0.entregas = edr.entregas
     }
@@ -271,12 +271,12 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
     \implicaLuego p0[j] = p1[j]}
 }
 
-\predLargo{mismosPasos}{e0, e1: Examen}{
-    \norm{e1} \leq \norm{e0} \yLuego\\
-    \paraTodo{j}{\Z}{0 \leq j < \norm{e0}\implicaLuego
-    \paraTodo{i}{\Z}{0 \leq i < \norm{e0[i]}}}\implicaLuego
-    e0[i][j]=e1[i][j]
-}
+%\predLargo{mismosPasos}{e0, e1: Examen}{
+%    \norm{e1} \leq \norm{e0} \yLuego\\
+%    \paraTodo{j}{\Z}{0 \leq j < \norm{e0}\implicaLuego
+%    \paraTodo{i}{\Z}{0 \leq i < \norm{e0[i]}}}\implicaLuego
+%    e0[i][j]=e1[i][j]
+%}
 
 \predLargo{respondio}{i: \Z, p: Examen}{
     (0 \leq i < \norm{p}) \yLuego\\
@@ -292,15 +292,15 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 }{
 }
     \requiereLargo{
-        perteneceAlumno(a.coord, edr.Aula) \yLuego
-        \\ edr = edr0
+        (perteneceAlumno(a.coord, edr.Aula)) \yLuego
+        \\ (edr = edr_0)
     } 
     \aseguraLargo{
         % CAMBIO EL a.examen, ANTES REVISABA EL ULTIMO PASO
-        edr.entregas = edr0.entregas ++ \tupla{a.coord, a.examen} \land
-        \\ edr.aula[a.coord.f][a.coord.c] = \langle \rangle \land
-        \\ \paraTodo {c1}{Coordenada} {coordenadaValida(c1, edr.aula) \yLuego c1 \neq a.coord \implicaLuego edr.aula[c1.f][c1.c] = edr0.aula[c1.f][c1.c]} \yLuego
-        \\ edr.solucion = edr0.solucion
+        (edr.entregas = edr_0.entregas ++ \langle a \rangle) \yLuego
+        \\ (edr.aula[a.coord.f][a.coord.c] = \langle \rangle) \yLuego
+        \\ (todosEstudiantesIgualesMenos(\langle a.coord \rangle,edr,edr_0)) \yLuego
+        \\ (edr.solucion = edr_0.solucion)
     }
     
 

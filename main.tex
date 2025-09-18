@@ -310,14 +310,28 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 % Metodo chequearCopias --------------------------------------------------
 \begin{proc}{chequearCopias}
 {
-\In alumnos: seq<Alumno> % Creo que no recibe nada o recibe un EdR
+\In edr: EdR
 }{
-\Tipo{seq<Alumno>}
+\Tipo{\seq{Alumno}}
 }
-    \requiere{True} % Si no recibe nada va True, a lo mejor recibe un EdR pero entonces también iría True, mientras sea un EdR válido sirve
-    \asegura{res} % Acá hay que ver cómo poner lo de propoción de rtas equivalentes a compañero cercano >60% y eso, cómo medirlo, o eso sería muy implementativo?
-    % Quedaría tipo, para todo alumno en aula, si esSimilarACercano(aula[i][j].examen) o esSimilarAAlumnado(aula[i][j].examen) entonces se concatena a la secuencia
+    \requiere{True} 
+    \aseguraLargo{
+        \paraTodo {a_1}{Alumno}{(a_1 \in edr.entregas) \implicaLuego ((a_1 \in res) \leftrightarrow 
+        \\ \existe{a_2}{Alumno}{a_2 \in edr.entregas  \land  enRango(a_1.coord, a_2.coord, edr.aula) \land 
+        \\ porcentajeRespuestasIgualAdyacente(a_1, a_2) > 60} \ \lor \\ (porcentajeIgualAula(a_1, edr.entregas) > 25))}
+}
 \end{proc}
+
+\aux{porcentajeRespuestasIgualAdyacente}{a_1, a_2: Alumno}{\Z}
+\\    $\frac{\sum_{i=0}^{\norm{a_1.examen}-1} IfThenElse(a_1.examen[i] = a_2.examen[i],1,0) \cdot 100}{\norm{a_1.examen}}$
+\\
+
+\aux{porcentajeIgualAula}{a_1:Alumno, entregas:\seq{Alumno}}{\Z}
+\\    $\frac{\sum_{i=0}^{\norm{entregas}-1}IfThenElse(a_1.examen = entregas[i].examen,1,0) \cdot 100}{\norm{entregas}}$
+\\
+\\
+\\
+\\
 
 \section{proc corregir}
 % Metodo corregir --------------------------------------------------

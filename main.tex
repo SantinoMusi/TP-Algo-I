@@ -45,6 +45,12 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
 
 \section{Especificacion}
 
+$Nota\ ES\ \Z$\\
+$Respuesta\ ES\ Char$\\
+$Examen\ ES\ \seq{Respuesta}$\\
+$Coordenada\ ES\ \struct{f:\Z, c:\Z}$\\
+$Alumno\ ES\ \struct{coord:Coordenada, examen:Examen}$\\
+$Aula\ ES\ \seq{\seq{Alumno}}$\\
 % Acá arrancamos el TAD --------------------------------------------------
 \begin{tad}{EdR}
 
@@ -319,8 +325,8 @@ Luego veremos bien el formato, esto de momento es para tener un esqueleto.
     \requiere{True} 
     \aseguraLargo{
         \paraTodo {a_1}{Alumno}{(a_1 \in edr.entregas) \implicaLuego ((a_1 \in res) \leftrightarrow 
-        \\ \existe{a_2}{Alumno}{a_2 \in edr.entregas  \land  enRango(a_1.coord, a_2.coord, edr.aula) \land 
-        \\ porcentajeRespuestasIgualAdyacente(a_1, a_2) > 60} \ \lor \\ (porcentajeIgualAula(a_1, edr.entregas) > 25))}
+        \\ (\existe{a_2}{Alumno}{a_2 \in edr.entregas  \land  enRango(a_1.coord, a_2.coord, edr.aula) \land 
+        \\ porcentajeRespuestasIgualAdyacente(a_1, a_2) > 60} \ \lor \\porcentajeIgualAula(a_1, edr.entregas) > 25))}
 }
 \end{proc}
 

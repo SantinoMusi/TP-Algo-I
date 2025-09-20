@@ -87,22 +87,27 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     \\ cantValidaEstudiantes(dimensionAula, cantEstudiantes)}
     \aseguraLargo{
     \norm{res.aula} = dimensionAula \yLuego
-    \\ \paraTodo{c1}{Coordenada}{(coordenadaValida(c1,res.aula) \yLuego res.aula[c1.f][c1.c].examen \neq \langle \rangle) \implicaLuego (edr.aula[c1.f][c1.c].coord.f = f \land edr.aula[c1.f][c1.c].coord.c = c)} \yLuego
     \\ aulaCuadrada(res.aula) \yLuego
-    \\ noHayAlumnosJuntos(res.aula) \yLuego
     \\ cuantosEstudiantes(res.aula) = cantEstudiantes \yLuego
     \\ examenesInicializados(res.aula, s) \yLuego
+    \\ noHayAlumnosJuntos(res.aula) \yLuego
+    \\ todosAlumnosConCoordenada(res.aula) \yLuego
     \\ res.solucion = s \yLuego 
-    \\ res.entregas = \conj{}
+    \\ res.entregas = \conj{} \yLuego
     \\ res.copiones = \conj{}
     }
 \end{proc}
 
+% Todos los espacios en el aula tienen su coordenada en el struct
+\predLargo{todosAlumnosConCoordenada}{a: aula}{
+    \paraTodo{c1}{Coordenada}{coordenadaValida(c1,a) \implicaLuego
+    \\(a[c1.f][c1.c].coord.f = c1.f \land a[c1.f][c1.c].coord.c = c1.c)}
+}
 % Las respuestas del examen estan en el rango de opciones
 \predLargo{rtaValida}{s: Examen}{
     \paraTodo{i}{\Z}{0 \leq i < \norm{s} \implicaLuego s[i] \in \conj{"0","1","2","3","4","5","6","7","8","9"}}
 }
-
+\\ \\ \\ \\
 % si c y f estan entre las dimensiones de aula la coordenada es valida 
 \predLargo{coordenadaValida}{c:Coordenada, a:Aula}{0 \leq c.f < \norm{a} \land 0 \leq c.c < \norm{a}}
 
@@ -119,18 +124,17 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 % si hay un alumno en el asiento entonces, el que le sigue tiene que ser vacio
 \predLargo{noHayAlumnosJuntos}{a: Aula}{
     \paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego 
-    \\ \paraTodo{j}{\Z}{0 \leq j < \norm{a[i]}-1 \implicaLuego (a[i][j].examen \neq \langle \rangle \implica a[i][j+1].examen = \langle \rangle)}}
+    \\ \paraTodo{j}{\Z}{(0 \leq j < \norm{a[i]}-1 \yLuego a[i][j].examen \neq \langle \rangle) \implicaLuego a[i][j+1].examen = \langle \rangle}}
 }
 
 % cuantos estudiantes hay en el aula
 \aux{cuantosEstudiantes}{a: Aula}{\Z} \\
     $\sum_{i=0}^{\norm{a}-1} \sum_{j=0}^{\norm{a[i]}-1} ifThenElse(a[i][j].examen \neq \langle \rangle,1,0)$
 \\
-\\
 
 % todos los examenes en el aula estan sin responder y son del largo correcto
 \predLargo{examenesInicializados}{a: Aula, sol: Examen}{
-    \paraTodo{c1}{Coordenada}{(coordenadaValida(c1, a) \yLuego a[c1.f][c1.c].examen \neq \langle \rangle) \implicaLuego 
+    \paraTodo{c1}{Coordenada}{(coordenadaValida(c1, a) \yLuego suExamen(c1, a) \neq \langle \rangle) \implicaLuego 
     \\ examenInicializado(a[c1.f][c1.c].examen, sol)}
 }
 
@@ -174,41 +178,51 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
         \\ \existe{a2}{Alumno}{ perteneceAlumno(a2, edr.aula)\ \yLuego\ enRango(a1.coord, a2.coord, edr.aula) \yLuego 
         \existe{i}{\Z}{a1.examen[i] = "" \land a2.examen[i] \neq ""}} \yLuego
         \\ (edr_0 = edr)
-    } 
+    }
     \aseguraLargo{
         \existe{a3}{Alumno}{perteneceAlumno(a3, edr_0.aula) \yLuego enRango(a1.coord, a3.coord, edr_0.aula) \yLuego 
-        \existe{j}{\Z}{suExamen(a1.coord, edr_0)[j]= "" \land \\
-        suExamen(a3.coord, edr_0)[j] \neq ""}\land \\
-        (suExamen(a1.coord, edr)[j] = suExamen(a3.coord, edr)[j]) \land\\
-        mismosEjerciciosMenos(j, suExamen(a1.coord, edr), suExamen(a1.coord, edr_0))} \yLuego
+        \existe{j}{\Z}{suExamen(a1.coord, edr_0.aula)[j]= "" \land \\
+        suExamen(a3.coord, edr_0.aula)[j] \neq ""}\land \\
+        (suExamen(a1.coord, edr.aula)[j] = suExamen(a3.coord, edr.aula)[j]) \land\\
+        mismosEjerciciosMenos(j, suExamen(a1.coord, edr.aula), suExamen(a1.coord, edr_0.aula))} \yLuego
         todosEstudiantesIgualesMenos(\langle a1.coord \rangle ,edr.aula,edr0.aula)\yLuego 
         \\ (edr_0.solucion = edr.solucion) \yLuego
         \\ (edr_0.entregas = edr.entregas) \yLuego
         \\ (edr_0.copiones = edr.copiones) \yLuego
-        \\ mismasDimensiones(edr.aula,edr_0.aula)
     } 
 \end{proc}
 \\
 
+\predLargo{sePuedeCopiar}{e1, e2: Alumno, i: \Z}{
+    suExamen(e1.coord, a)[i]= "" \land suExamen(e2.coord, a)[i] \neq ""
+}
+\\
+\predLargo{seCopia}{e1, e2: Alumno, a0, a1: Aula}{
+    sePuedeCopiar(e1, e2, a0) \yLuego 
+}
+\\
+% a1 y a2 tienen la misma norma y son cuadradas
 \predLargo{mismasDimensiones}{a1,a2: Aula}{
     \norm{a1}=\norm{a2} \land aulaCuadrada(a1) \land aulaCuadrada(a2)
 }
 
+% Las aulas son iguales en todas las coordenadas menos en las especificadas en coords 
 \predLargo{todosEstudiantesIgualesMenos}{coords: \seq{Coordenada}, a0, a1: Aula}{
-        \norm{a0} = \norm{a1}\land\\ 
+        mismasDimensiones(a0, a1)\land\\ 
         \paraTodo{c1}{Coordenada}{(coordenadaValida(c1, a0) \land \neg(c1 \in coords)) \implicaLuego a1[c1.f][c1.c] = a0[c1.f][c1.c]}
 }
 
+% e0 es igual a e1 en todos los ejercicios menos en i
 \predLargo{mismosEjerciciosMenos}{i: \Z, e0, e1: Examen}{
     \norm{e1} = \norm{e0} \yLuego\\
     \paraTodo{j}{\Z}{(0 \leq j < \norm{e0} \land j \neq i)
     \implicaLuego e0[j] = e1[j]}
 }
-% las coordenadas del alumno estan en el aula y el examen es el mismo
 
+% las coordenadas del alumno estan en el aula y el examen es el mismo
 \predLargo{perteneceAlumno}{e: Alumno, a:Aula}{
-    (coordenadaValida(e.coord, a) \yLuego a[e.coord.f][e.coord.c].examen \neq \langle \rangle \yLuego\\
-    a[e.coord.f][e.coord.c].examen = e.examen)
+    (coordenadaValida(e.coord, a) \yLuego suExamen(e.coord, a) \neq \langle \rangle \yLuego\\
+    suExamen(e.cord, a) = e.examen)
 }
 
 % las coordenadas estan dentro del aula y c0 esta a distancia |2| de c1 en x o esta directamente adelante en y
@@ -219,7 +233,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 }
 
 % devuelve el examen del alumno en c1
-\aux{suExamen}{c1:Coordenada, edr:EdR}{Examen} \ $edr.aula.[c1.f][c1.c].examen$
+\aux{suExamen}{c1:Coordenada, a: Aula}{Examen} \ $a[c1.f][c1.c].examen$
 
 
 \subsection{proc consultarDarkWeb}
@@ -238,8 +252,8 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     \aseguraLargo{
     \existe {n}{\Z}{0 \leq n \leq posiblesAccesos \land 0 \leq n \leq cuantosEstudiantes(edr.aula)} \land
     \\\existe {seCopian}{\seq{Coordenada}}{\norm{seCopian} = n \yLuego \\\paraTodo{c1}{Coordenada}{c1 \in seCopian \implica \\(coordenadaValida(c1,edr.aula) \yLuego 
-    edr.aula[c1.f][c1.c].examen \neq \langle \rangle \yLuego\\
-    suExamen(c1,edr) = s)}} \yLuego
+    suExamen(c1, edr.aula) \neq \langle \rangle \yLuego\\
+    suExamen(c1,edr.aula) = s)}} \yLuego
     \\todosEstudiantesIgualesMenos(seCopian,edr.aula, edr_0.aula) \yLuego
     \\edr.solucion = edr_0.solucion \yLuego
     \\edr.entregas = edr_0.entregas \yLuego
@@ -247,8 +261,6 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     \\mismasDimensiones(edr.aula,edr_0.aula)
 }
 \end{proc}
-\\ \\ \\
-% si las 2 aulas comparten dimension -> todos los alumnos menos los que estan en la secuencia coords son el mismo
 \subsection{proc resolver}
 % Metodo resolver --------------------------------------------------
 \begin{proc}{resolver}
@@ -270,7 +282,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
         % vv el examen q devolvemos tiene t+1 pasos
         \norm{res} = \norm{e} + 1\yLuego\\
         % aca me aseguro que en el paso t+1 resuelvo un ejercicio que en el paso t no estaba resuelto vv
-        hayNuevoEjercicioResuelto(e[\norm{e}-1]), a.examen)\land\\
+        hayNuevoEjercicioResuelto(e[\norm{e}-1], a.examen)\land\\
         % vv aca me fijo que el resto de pasos esten igual
         res = e ++ \langle a.examen\rangle \yLuego\\
         % vv igualo el examen en edr con el examen q devuelvo
@@ -284,6 +296,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     }
 \end{proc}
 
+% existe solo 1 ejercicio con respuesta nueva en e1 que en e0 no estaba
 \predLargo{hayNuevoEjercicioResuelto}{e0, e1: Examen}{
         (\exists k: \Z)(0 \leq k < \norm{e0} \yLuego
         mismosEjerciciosMenos(k, e1, e0) \land\\
@@ -291,7 +304,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
         respondio(k, e1))
 }
 
-% i es un indice de examen y el valor del examen en i es una respuesta valida
+% el ejercicio i del examen fue resuelto
 \predLargo{respondio}{i: \Z, e: Examen}{
     (0 \leq i < \norm{e}) \yLuego\\
     e[i]\in \conj{"0","1","2","3","4","5","6","7","8","9"}
@@ -312,7 +325,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     \aseguraLargo{
         % CAMBIO EL a.examen, ANTES REVISABA EL ULTIMO PASO
         (edr.entregas = edr_0.entregas \cup \conj{a}) \yLuego
-        \\ (edr.aula[a.coord.f][a.coord.c].examen = \langle \rangle) \yLuego
+        \\ (suExamen(a.coord, edr.aula) = \langle \rangle) \yLuego
         \\ (todosEstudiantesIgualesMenos(\langle a.coord \rangle,edr,edr_0)) \yLuego
         \\ (edr.solucion = edr_0.solucion) \yLuego
         \\ (edr.copiones = edr_0.copiones) \yLuego
@@ -332,7 +345,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     \aseguraLargo{
         \paraTodo {a1}{Alumno}{(a1 \in edr.entregas) \implicaLuego ((a1 \in res) \leftrightarrow 
         \\ (\existe{a2}{Alumno}{a2 \in edr.entregas  \land  enRango(a1.coord, a2.coord, edr.aula) \land 
-        \\ porcentajeRespuestasIgualAdyacente(a1, a2) > 60} \ \lor \\porcentajeIgualAula(a1, edr.entregas) > 25))}
+        \\ porcentajeRespuestasIgualAdyacente(a1, a2) > 60} \ \lor \\porcentajeIgualAula(a1, edr.entregas) > 25))}\yLuego
         \\ \norm{edr.copiones} = \norm{res} \yLuego
         \\ \paraTodo{a3}{Alumno}{a3 \in edr.copiones \leftrightarrow a3 \in res}
         }
@@ -344,13 +357,14 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 \\
 
 % devuelve el porcentaje de alumnos que tienen el mismo examen que a1 en una secuencia
-\aux{porcentajeIgualAula}{a1:Alumno, entregas:\conj{Alumno}}{\Z}
-\\ $(\sum_{i \in entregas}IfThenElse(a1.examen = i.examen,1,0)) \cdot \frac{100}{\norm{entregas}-1}$
+\aux{porcentajeIgualAula}{a:Alumno, entregas:\conj{Alumno}}{\Z}
+\\ $(\sum_{i \in entregas}IfThenElse( a \neq i\land a.examen = i.examen,1,0)) \cdot \frac{100}{\norm{entregas}-1}$
 \\
 
+% No queda ningun estudiante en el aula
 \predLargo{todosEntregaron}{edr: EdR}{
     \norm{edr.entregas} > 0 \land
-    \\\paraTodo{c1}{Coordenada}{coordenadaValida(c1,edr.aula) \implicaLuego edr.aula[c1.f][c1.c].examen = \langle \rangle}
+    \\\paraTodo{c1}{Coordenada}{coordenadaValida(c1,edr.aula) \implicaLuego suExamen(c1, edr.aula) = \langle \rangle}
 }
 
 \subsection{proc corregir}

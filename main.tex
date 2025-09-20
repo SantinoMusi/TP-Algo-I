@@ -82,18 +82,19 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 \Tipo{EdR}
 }
     \requiereLargo{
-        (dimensionAula > 0) \yLuego
+        dimensionAula > 0 \yLuego
     \\ rtaValida(s) \yLuego
     \\ cantValidaEstudiantes(dimensionAula, cantEstudiantes)}
     \aseguraLargo{
-        (\norm{res.aula} = dimensionAula) \yLuego
+    \norm{res.aula} = dimensionAula \yLuego
+    \\ \paraTodo{i}{\Z}{\paraTodo{j}{\Z}{((0 \leq i < dimensionAula \land 0 \leq j < dimensionAula) \yLuego edr.aula[i][j] \neq \langle \rangle) \implicaLuego \\((edr.aula[i][j].coord.f = i \land edr.aula[i][j].coord.c = j))}} \yLuego
     \\ aulaCuadrada(res.aula) \yLuego
     \\ noHayAlumnosJuntos(res.aula) \yLuego
-    \\ (cuantosEstudiantes(res.aula) = cantEstudiantes) \yLuego
-    \\ examenesSinResponder(res.aula) \yLuego
-    \\ (res.solucion = s) \yLuego 
-    \\ (res.entregas = \conj{})
-    \\ (res.copiones = \conj{})
+    \\ cuantosEstudiantes(res.aula) = cantEstudiantes \yLuego
+    \\ examenesInicializados(res.aula, s) \yLuego
+    \\ res.solucion = s \yLuego 
+    \\ res.entregas = \conj{}
+    \\ res.copiones = \conj{}
     }
 \end{proc}
 
@@ -103,8 +104,8 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 }
 
 % La cantidad de estudiantes a lo sumo no hace que haya alumnos juntos
-\predLargo{cantValidaEstudiantes}{a: Aula, c: \Z}{
-    (c \leq ifThenElse(mod(\norm{a},2)=0, \frac{\norm{a}^ 2}{2}, \frac{\norm{a} + 1}{2} * \norm{a}))    
+\predLargo{cantValidaEstudiantes}{a, c: \Z}{
+    (c \leq ifThenElse(mod(a,2)=0, \frac{a^ 2}{2}, \frac{a + 1}{2} * a))    
 }
 \\ \\ \\ \\ \\ 
 % el aula tiene misma cantidad de filas y columnas
@@ -124,14 +125,15 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 \\
 \\
 
-% todos los examenes en el aula estan sin responder
-\predLargo{examenesSinResponder}{a: Aula}{
-    \paraTodo{c}{Coordenada}{(coordenadaValida(c, edr.aula) \yLuego a[c.x][c.y] \neq \langle \rangle) \implicaLuego 
-    \\ examenSinResponder(a[c.x][c.y].examen)}
+% todos los examenes en el aula estan sin responder y son del largo correcto
+\predLargo{examenesInicializados}{a: Aula, sol: Examen}{
+    \paraTodo{c1}{Coordenada}{(coordenadaValida(c1, a) \yLuego a[c1.f][c1.c] \neq \langle \rangle) \implicaLuego 
+    \\ examenInicializado(a[c1.f][c1.c].examen, sol)}
 }
 
 % El examen no tiene ninguna respuesta
-\predLargo{examenSinResponder}{e: Examen}{
+\predLargo{examenInicializado}{e: Examen, sol: Examen}{
+    \norm{e} = \norm{sol} \yLuego
     \paraTodo{i}{\Z}{0 \leq i < \norm{e} \implicaLuego e[i] = ""}
 }
 

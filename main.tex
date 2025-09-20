@@ -237,8 +237,8 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     \\posiblesAccesos \geq 0}
     \aseguraLargo{
     \existe {n}{\Z}{0 \leq n \leq posiblesAccesos \land 0 \leq n \leq cuantosEstudiantes(edr.aula)} \land
-    \\\existe {seCopian}{seq\langle Coordenada \rangle}{\norm{seCopian} = n \yLuego \\\paraTodo{c1}{Coordenada}{c1 \in seCopian \implica \\(coordenadaValida(c1,edr.aula) \yLuego 
-    edr.aula[c1.f][c1.c] \neq \langle\rangle \yLuego\\
+    \\\existe {seCopian}{\seq{Coordenada}}{\norm{seCopian} = n \yLuego \\\paraTodo{c1}{Coordenada}{c1 \in seCopian \implica \\(coordenadaValida(c1,edr.aula) \yLuego 
+    edr.aula[c1.f][c1.c].examen \neq \langle \rangle \yLuego\\
     suExamen(c1,edr) = s)}} \yLuego
     \\todosEstudiantesIgualesMenos(seCopian,edr.aula, edr_0.aula) \yLuego
     \\edr.solucion = edr_0.solucion \yLuego

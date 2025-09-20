@@ -82,12 +82,12 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 \Tipo{EdR}
 }
     \requiereLargo{
-        dimensionAula > 0 \yLuego
+    dimensionAula > 0 \yLuego
     \\ rtaValida(s) \yLuego
     \\ cantValidaEstudiantes(dimensionAula, cantEstudiantes)}
     \aseguraLargo{
     \norm{res.aula} = dimensionAula \yLuego
-    \\ \paraTodo{i}{\Z}{\paraTodo{j}{\Z}{((0 \leq i < dimensionAula \land 0 \leq j < dimensionAula) \yLuego edr.aula[i][j] \neq \langle \rangle) \implicaLuego \\((edr.aula[i][j].coord.f = i \land edr.aula[i][j].coord.c = j))}} \yLuego
+    \\ \paraTodo{c1}{Coordenada}{(coordenadaValida(c1,res.aula) \yLuego res.aula[c1.f][c1.c] \neq \langle \rangle) \implicaLuego (edr.aula[c1.f][c1.c].coord.f = f \land edr.aula[c1.f][c1.c].coord.c = c)} \yLuego
     \\ aulaCuadrada(res.aula) \yLuego
     \\ noHayAlumnosJuntos(res.aula) \yLuego
     \\ cuantosEstudiantes(res.aula) = cantEstudiantes \yLuego
@@ -103,11 +103,14 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     \paraTodo{i}{\Z}{0 \leq i < \norm{s} \implicaLuego s[i] \in \conj{"0","1","2","3","4","5","6","7","8","9"}}
 }
 
+% si c y f estan entre las dimensiones de aula la coordenada es valida 
+\predLargo{coordenadaValida}{c:Coordenada, a:Aula}{0 \leq c.f < \norm{a} \land 0 \leq c.c < \norm{a}}
+
 % La cantidad de estudiantes a lo sumo no hace que haya alumnos juntos
 \predLargo{cantValidaEstudiantes}{a, c: \Z}{
     (c \leq ifThenElse(mod(a,2)=0, \frac{a^ 2}{2}, \frac{a + 1}{2} * a))    
 }
-\\ \\ \\ \\ \\ 
+
 % el aula tiene misma cantidad de filas y columnas
 \predLargo{aulaCuadrada}{a: Aula}{
     \paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego \norm{a[i]} = \norm{a}}
@@ -146,11 +149,11 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 \Tipo{Bool}
 }
     \requiere{True}
-    \aseguraLargo{(res = True) \leftrightarrow
-    \\ (edr_1.aula = edr_2.aula) \land
-    \\ (edr_1.solucion = edr_2.solucion) \land
-    \\ (edr_1.entregas = edr_2.entregas) \land
-    \\ (edr_1.copiones = edr_2.copiones)
+    \aseguraLargo{res = True \leftrightarrow
+    \\ (edr_1.aula = edr_2.aula \land
+    \\ edr_1.solucion = edr_2.solucion \land
+    \\ edr_1.entregas = edr_2.entregas \land
+    \\ edr_1.copiones = edr_2.copiones)
     }
 \end{proc}
 
@@ -202,13 +205,11 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     \implicaLuego e0[j] = e1[j]}
 }
 % las coordenadas del alumno estan en el aula y el examen es el mismo
+
 \predLargo{perteneceAlumno}{e: Alumno, a:Aula}{
     (coordenadaValida(e.coord, a) \yLuego a[e.coord.f][e.coord.c] \neq \langle \rangle \yLuego\\
     a[e.coord.f][e.coord.c].examen = e.examen)
 }
-
-% si c y f estan entre las dimensiones de aula la coordenada es valida 
-\pred{coordenadaValida}{c:Coordenada, a:Aula}{0 \leq c.f < \norm{a} \land 0 \leq c.c < \norm{a}}\\
 
 % las coordenadas estan dentro del aula y c0 esta a distancia |2| de c1 en x o esta directamente adelante en y
 \predLargo{enRango}{c1, c2: Coordenada, a: Aula}{
@@ -256,12 +257,12 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 \In a: Alumno,
 \In e: \seq{Examen}
 }{
-\Tipo{Examen}
+\Tipo{\seq{Examen}}
 }
     \requiereLargo{
-    examenSinResponder(a.examen)\yLuego\\
-    \norm{e} > 0 \yLuego\\
     perteneceAlumno(a, edr.aula)\yLuego\\
+    examenInicializado(a.examen, edr.solucion)\yLuego\\
+    \norm{e} > 0 \yLuego\\
     edr0 = edr
     }
     \aseguraLargo{
@@ -286,10 +287,11 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 \end{proc}
 
 % Existe al menos una pregunta no resuelta en e
-\predLargo{hayPreguntaSinResponder}{e: Examen}{
-(\exists i:\Z)(0 \leq i < \norm{e} \yLuego e[i]="")
-}
+%\predLargo{hayPreguntaSinResponder}{e: Examen}{
+%(\exists i:\Z)(0 \leq i < \norm{e} \yLuego e[i]="")
+%}
 % todos los pasos en p0 y p1 son iguales menos los ultimos en p0
+
 \predLargo{mismosPasos}{p0, p1: \seq{Examen}}{
    \norm{p1} \leq \norm{p0} \yLuego\\
    \paraTodo{j}{\Z}{0 \leq j < \norm{p0}\implicaLuego
@@ -334,7 +336,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 }{
 \Tipo{\seq{Alumno}}
 }
-    \requiere{True} 
+    \requiere{todosEntregaron(edr)} 
     \aseguraLargo{
         \paraTodo {a1}{Alumno}{(a1 \in edr.entregas) \implicaLuego ((a1 \in res) \leftrightarrow 
         \\ (\existe{a2}{Alumno}{a2 \in edr.entregas  \land  enRango(a1.coord, a2.coord, edr.aula) \land 
@@ -354,6 +356,11 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 \\ $(\sum_{i \in entregas}IfThenElse(a1.examen = i.examen,1,0)) \cdot \frac{100}{\norm{entregas}-1}$
 \\
 
+\predLargo{todosEntregaron}{edr: EdR}{
+    \norm{edr.entregas} > 0 \land
+    \\\paraTodo{c1}{Coordenada}{coordenadaValida(c1,edr.aula) \implicaLuego edr.aula[c1.f][c1.c]=\langle \rangle}
+}
+
 \subsection{proc corregir}
 % Metodo corregir --------------------------------------------------
 \begin{proc}{corregir} 
@@ -362,7 +369,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 }{
 \Tipo{\seq{tupla\tupla{Alumno, Nota}}}
 }
-    \requiere{True}
+    \requiere{todosEntregaron(edr)}
     \aseguraLargo{
         \paraTodo{a}{Alumno}{(a \in edr.entregas \land \lnot (a \in edr.copiones)) \implicaLuego
         \\ (tupla\tupla{a, nota(a, edr.solucion)} \in res)}

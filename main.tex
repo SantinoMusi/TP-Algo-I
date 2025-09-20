@@ -254,7 +254,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 \begin{proc}{resolver}
 {
 \Inout edr: EdR,
-\In a: Alumno,
+\Inout a: Alumno,
 \In e: \seq{Examen}
 }{
 \Tipo{\seq{Examen}}
@@ -263,22 +263,20 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     perteneceAlumno(a, edr.aula)\yLuego\\
     examenInicializado(a.examen, edr.solucion)\yLuego\\
     \norm{e} > 0 \yLuego\\
-    edr0 = edr
+    edr_0 = edr \yLuego\\
+    a_0 = a
     }
     \aseguraLargo{
         % vv el examen q devolvemos tiene t+1 pasos
         \norm{res} = \norm{e} + 1\yLuego\\
         % aca me aseguro que en el paso t+1 resuelvo un ejercicio que en el paso t no estaba resuelto vv
-        (\exists k: \Z)(0 \leq k < \norm{e[0]} \yLuego\\
-        mismosEjerciciosMenos(k, res[\norm{res}-1], e[\norm{e}-1]) \land\\
-        \lnot respondio(k, e[\norm{e}-1]) \land
-        respondio(k, res[\norm{res}-1]))\yLuego\\
+        hayNuevoEjercicioResuelto(e[\norm{e}-1]), a.examen)\land\\
         % vv aca me fijo que el resto de pasos esten igual
-        mismosPasos(res, e) \yLuego\\
+        res = e ++ \langle a.examen\rangle \yLuego\\
         % vv igualo el examen en edr con el examen q devuelvo
-        edr.aula[a.coord.f][a.coord.c].examen = res[\norm{res}-1]\yLuego\\
+        edr.aula[a.coord.f][a.coord.c] = a\yLuego\\
         % vv Todo el resto sigue igual
-        todosEstudiantesIgualesMenos(\langle a.coord \rangle, edr.aula, edr0.aula)\yLuego\\ %está bien la sintaxis de pasarle una secuencia solo con a.coord? cómo sería?
+        todosEstudiantesIgualesMenos(\langle a.coord \rangle, edr.aula, edr_0.aula)\yLuego\\ 
         edr_0.solucion = edr.solucion \yLuego\\
         edr_0.entregas = edr.entregas \yLuego\\
         edr_0.copiones = edr.copiones \yLuego
@@ -286,17 +284,11 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     }
 \end{proc}
 
-% Existe al menos una pregunta no resuelta en e
-%\predLargo{hayPreguntaSinResponder}{e: Examen}{
-%(\exists i:\Z)(0 \leq i < \norm{e} \yLuego e[i]="")
-%}
-% todos los pasos en p0 y p1 son iguales menos los ultimos en p0
-
-\predLargo{mismosPasos}{p0, p1: \seq{Examen}}{
-   \norm{p1} \leq \norm{p0} \yLuego\\
-   \paraTodo{j}{\Z}{0 \leq j < \norm{p0}\implicaLuego
-   \paraTodo{i}{\Z}{0 \leq i < \norm{p0[i]}}}\implicaLuego
-   p0[i][j]=p1[i][j]
+\predLargo{hayNuevoEjercicioResuelto}{e0, e1: Examen}{
+        (\exists k: \Z)(0 \leq k < \norm{e0} \yLuego
+        mismosEjerciciosMenos(k, e1, e0) \land\\
+        \lnot respondio(k, e0) \land
+        respondio(k, e1))
 }
 
 % i es un indice de examen y el valor del examen en i es una respuesta valida

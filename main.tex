@@ -191,7 +191,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 \\
 
 \predLargo{mismasDimensiones}{a1,a2: Aula}{
-    \norm{a1}=\norm{a2}
+    \norm{a1}=\norm{a2} \land aulaCuadrada(a1) \land aulaCuadrada(a2)
 }
 
 \predLargo{todosEstudiantesIgualesMenos}{coords: \seq{Coordenada}, a0, a1: Aula}{

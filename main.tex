@@ -174,17 +174,23 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 \Tipo{}
 }
     \requiereLargo{ 
-        perteneceAlumno(a1, edr.aula) \yLuego
-        \\ \existe{a2}{Alumno}{ perteneceAlumno(a2, edr.aula)\ \yLuego\ enRango(a1.coord, a2.coord, edr.aula) \yLuego 
-        \existe{i}{\Z}{a1.examen[i] = "" \land a2.examen[i] \neq ""}} \yLuego
-        \\ (edr_0 = edr)
+        perteneceAlumno(a1, edr.aula) \yLuego\\
+        \existe{i}{\Z}{0\leq i < \norm{a1.examen}\yLuego \existe{a2}{alumno}{\\
+        perteneceAlumno(a2, edr.aula)\ \yLuego\\
+        (enRango(a1.coord, a2.coord, edr.aula) \land\\
+        suExamen(a1.coord, edr.aula)[i] = "" \land\\
+        suExamen(a2.coord, edr.aula)[i] \neq "")}}\yLuego
+        (edr_0 = edr)
     }
     \aseguraLargo{
-        \existe{a3}{Alumno}{perteneceAlumno(a3, edr_0.aula) \yLuego enRango(a1.coord, a3.coord, edr_0.aula) \yLuego 
-        \existe{j}{\Z}{suExamen(a1.coord, edr_0.aula)[j]= "" \land \\
-        suExamen(a3.coord, edr_0.aula)[j] \neq ""}\land \\
-        (suExamen(a1.coord, edr.aula)[j] = suExamen(a3.coord, edr.aula)[j]) \land\\
-        mismosEjerciciosMenos(j, suExamen(a1.coord, edr.aula), suExamen(a1.coord, edr_0.aula))} \yLuego
+        \existe{j}{\Z}{0\leq j < \norm{a1.examen}\yLuego \existe{a3}{alumno}{\\
+            perteneceAlumno(a3, edr_0.aula) \yLuego \\
+            (enRango(a1.coord, a3.coord, edr_0.aula)\land\\
+            suExamen(a1.coord, edr_0.aula)[j]= "" \land \\
+            suExamen(a3.coord, edr_0.aula)[j] \neq "" \land\\
+            suExamen(a1.coord, edr.aula)[j] = suExamen(a3.coord, edr.aula)[j]\land\\
+            mismosEjerciciosMenos(j, suExamen(a1.coord, edr.aula), a1.examen))\\
+        }}\yLuego\\
         todosEstudiantesIgualesMenos(\langle a1.coord \rangle ,edr.aula,edr0.aula)\yLuego 
         \\ (edr_0.solucion = edr.solucion) \yLuego
         \\ (edr_0.entregas = edr.entregas) \yLuego
@@ -366,8 +372,12 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 }
     \requiere{todosEntregaron(edr)}
     \aseguraLargo{
-        \paraTodo{a}{Alumno}{(a \in edr.entregas \land \lnot (a \in edr.copiones)) \implicaLuego
-        \\ (tupla\tupla{a, nota(a, edr.solucion)} \in res)}
+        % aca uso es si y solo si para que solo tenga esos elementos
+        \paraTodo{a}{Alumno}{(a \in edr.entregas \land \lnot (a \in edr.copiones)) \leftrightarrow\\
+        % me fijo que la tupla este una sola vez
+        \existe{i}{\Z}{0 \leq i < \norm{res} \yLuego res[i] = tupla\tupla{a, nota(a, edr.solucion)}\yLuego\\
+        \neg \existe{j}{\Z}{0 \leq j < \norm{res}\yLuego res[i] = res[j]}}}
+        % con el existencial es necesario chequear el rango en el que es valido???
 }
 \end{proc}
 

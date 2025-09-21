@@ -40,6 +40,7 @@
 \section{Aclaraciones}
 
 Tomamos un asiento vacío en el aula como un struct Alumno con examen = $\seq{}$\\
+
 En proc chequearCopias, en el aux porcentajeRespuestasIgualAdyacente aseguramos que se cuenten las respuestas vacías como coincidencias, debido a la aclaración de uno de los profesores, y en aux porcentajeIgualAula comparamos el examen entero con el \textbf{resto} del alumnado según lo especificado en la consigna.
 
 \section{Especificacion}
@@ -104,11 +105,12 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     \paraTodo{c1}{Coordenada}{coordenadaValida(c1,a) \implicaLuego
     \\(a[c1.f][c1.c].coord.f = c1.f \land a[c1.f][c1.c].coord.c = c1.c)}
 }
+\\ \\
 % Las respuestas del examen estan en el rango de opciones
 \predLargo{rtaValida}{s: Examen}{
     \paraTodo{i}{\Z}{0 \leq i < \norm{s} \implicaLuego s[i] \in \conj{"0","1","2","3","4","5","6","7","8","9"}}
 }
-\\ \\ \\ \\
+
 % si c y f estan entre las dimensiones de aula la coordenada es valida 
 \predLargo{coordenadaValida}{c:Coordenada, a:Aula}{0 \leq c.f < \norm{a} \land 0 \leq c.c < \norm{a}}
 
@@ -250,8 +252,8 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     \\posiblesAccesos \geq 0}
     \aseguraLargo{
     \existe {n}{\Z}{0 \leq n \leq posiblesAccesos \land 0 \leq n \leq cuantosEstudiantes(edr.aula)} \land
-    \\\existe {seCopian}{\seq{Coordenada}}{\norm{seCopian} = n \yLuego \\\paraTodo{c1}{Coordenada}{c1 \in seCopian \implica \\(coordenadaValida(c1,edr.aula) \yLuego 
-    suExamen(c1, edr.aula) \neq \langle \rangle \yLuego\\
+    \\\existe {seCopian}{\seq{Coordenada}}{\norm{seCopian} = n \land \\\paraTodo{c1}{Coordenada}{c1 \in seCopian \implica \\(coordenadaValida(c1,edr_0.aula) \yLuego 
+    suExamen(c1, edr_0.aula) = \langle \rangle \land\\
     suExamen(c1,edr.aula) = s)}} \yLuego
     \\todosEstudiantesIgualesMenos(seCopian,edr.aula, edr_0.aula) \yLuego
     \\edr.solucion = edr_0.solucion \yLuego

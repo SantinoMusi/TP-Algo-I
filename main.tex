@@ -39,9 +39,9 @@
 
 \section{Aclaraciones}
 
-Tomamos un asiento vacío en el aula como un struct Alumno con examen = $\seq{}$\\
+Tomamos un asiento vacío en el aula como un struct Alumno con examen = $\seq{}$.\\
 
-En proc chequearCopias, en el aux porcentajeRespuestasIgualAdyacente aseguramos que se cuenten las respuestas vacías como coincidencias, debido a la aclaración de uno de los profesores, y en aux porcentajeIgualAula comparamos el examen entero con el \textbf{resto} del alumnado según lo especificado en la consigna.
+En proc \textit{chequearCopias}, en el aux \textit{porcentajeRespuestasIgualAdyacente} aseguramos que se cuenten las respuestas vacías como coincidencias, debido a la aclaración de uno de los profesores, y en aux porcentajeIgualAula comparamos el examen entero con el \textbf{resto} del alumnado según lo especificado en la consigna.
 
 \section{Especificacion}
 
@@ -72,7 +72,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 \\
 \obs{entregas}{\conj{Alumno}}
 \\
-\obs{copiones}{\conj{Alumno}}
+\obs{sospechosos}{\conj{Alumno}}
 \subsection{proc EdR}
 % Metodo EdR --------------------------------------------------
 \begin{proc}{EdR}
@@ -96,7 +96,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     \\ todosAlumnosConCoordenada(res.aula) \yLuego
     \\ res.solucion = s \yLuego 
     \\ res.entregas = \conj{} \yLuego
-    \\ res.copiones = \conj{}
+    \\ res.sospechosos = \conj{}
     }
 \end{proc}
 
@@ -160,7 +160,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     \\ (edr_1.aula = edr_2.aula \land
     \\ edr_1.solucion = edr_2.solucion \land
     \\ edr_1.entregas = edr_2.entregas \land
-    \\ edr_1.copiones = edr_2.copiones)
+    \\ edr_1.sospechosos = edr_2.sospechosos)
     }
 \end{proc}
 
@@ -197,7 +197,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
         todosEstudiantesIgualesMenos(\langle a1.coord \rangle ,edr.aula,edr0.aula)\yLuego 
         \\ (edr_0.solucion = edr.solucion) \yLuego
         \\ (edr_0.entregas = edr.entregas) \yLuego
-        \\ (edr_0.copiones = edr.copiones) \yLuego
+        \\ (edr_0.sospechosos = edr.sospechosos) \yLuego
     } 
 \end{proc}
 \\
@@ -249,16 +249,18 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     edr = edr_0 \yLuego
     \\rtaValida(s) \yLuego
     \\\norm{s} = \norm{edr.solucion} \yLuego
-    \\posiblesAccesos \geq 0}
+    \\posiblesAccesos \geq 0
+    }
     \aseguraLargo{
     \existe {n}{\Z}{0 \leq n \leq posiblesAccesos \land 0 \leq n \leq cuantosEstudiantes(edr.aula)} \land
-    \\\existe {seCopian}{\seq{Coordenada}}{\norm{seCopian} = n \land \\\paraTodo{c1}{Coordenada}{c1 \in seCopian \implica \\(coordenadaValida(c1,edr_0.aula) \yLuego 
-    suExamen(c1, edr_0.aula) = \langle \rangle \land\\
-    suExamen(c1,edr.aula) = s)}} \yLuego
+    \\ \existe {seCopian}{\seq{Coordenada}}{\norm{seCopian} = n \land 
+    \\ \paraTodo{c1}{Coordenada}{c1 \in seCopian \leftrightarrow 
+    \\(coordenadaValida(c1,edr_0.aula) \yLuego suExamen(c1, edr_0.aula) \neq \langle \rangle \land
+    \\ suExamen(c1,edr.aula) = s)}} \yLuego
     \\todosEstudiantesIgualesMenos(seCopian,edr.aula, edr_0.aula) \yLuego
     \\edr.solucion = edr_0.solucion \yLuego
     \\edr.entregas = edr_0.entregas \yLuego
-    \\edr.copiones = edr_0.copiones \yLuego
+    \\edr.sospechosos = edr_0.sospechosos \yLuego
 }
 \end{proc}
 \subsection{proc resolver}
@@ -291,7 +293,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
         todosEstudiantesIgualesMenos(\langle a.coord \rangle, edr.aula, edr_0.aula)\yLuego\\ 
         edr_0.solucion = edr.solucion \yLuego\\
         edr_0.entregas = edr.entregas \yLuego\\
-        edr_0.copiones = edr.copiones \yLuego
+        edr_0.sospechosos = edr.sospechosos \yLuego
     }
 \end{proc}
 
@@ -327,7 +329,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
         \\ (suExamen(a.coord, edr.aula) = \langle \rangle) \yLuego
         \\ (todosEstudiantesIgualesMenos(\langle a.coord \rangle,edr,edr_0)) \yLuego
         \\ (edr.solucion = edr_0.solucion) \yLuego
-        \\ (edr.copiones = edr_0.copiones) \yLuego
+        \\ (edr.sospechosos = edr_0.sospechosos) \yLuego
     }
 \end{proc}
 
@@ -344,8 +346,8 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
         \paraTodo {a1}{Alumno}{(a1 \in edr.entregas) \implicaLuego ((a1 \in res) \leftrightarrow 
         \\ (\existe{a2}{Alumno}{a2 \in edr.entregas  \land  enRango(a1.coord, a2.coord, edr.aula) \land 
         \\ porcentajeRespuestasIgualAdyacente(a1, a2) > 60} \ \lor \\porcentajeIgualAula(a1, edr.entregas) > 25))}\yLuego
-        \\ \norm{edr.copiones} = \norm{res} \yLuego
-        \\ \paraTodo{a3}{Alumno}{a3 \in edr.copiones \leftrightarrow a3 \in res}
+        \\ \norm{edr.sospechosos} = \norm{res} \yLuego
+        \\ \paraTodo{a3}{Alumno}{a3 \in edr.sospechosos \leftrightarrow a3 \in res}
         }
 \end{proc}
 
@@ -361,8 +363,8 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 
 % No queda ningun estudiante en el aula
 \predLargo{todosEntregaron}{edr: EdR}{
-    \norm{edr.entregas} > 0 \land
-    \\\paraTodo{c1}{Coordenada}{coordenadaValida(c1,edr.aula) \implicaLuego suExamen(c1, edr.aula) = \langle \rangle}
+    \norm{edr.entregas} > 0 \land \paraTodo{c1}{Coordenada}{coordenadaValida(c1,edr.aula) \implicaLuego 
+    \\ suExamen(c1, edr.aula) = \langle \rangle}
 }
 
 \subsection{proc corregir}
@@ -376,11 +378,11 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     \requiere{todosEntregaron(edr)}
     \aseguraLargo{
         % aca uso es si y solo si para que solo tenga esos elementos
-        \paraTodo{a}{Alumno}{(a \in edr.entregas \land \lnot (a \in edr.copiones)) \leftrightarrow\\
+        \paraTodo{a}{Alumno}{(a \in edr.entregas \land \lnot (a \in edr.sospechosos)) \leftrightarrow\\
         tupla\tupla{a, nota(a, edr.solucion)} \in res\yLuego\\
         % me fijo que la tupla este una sola vez
         \paraTodo{i}{\Z}{0 \leq i < \norm{res} \implicaLuego
-        \paraTodo{j}{\Z}{0 \leq j < \norm{res}\implicaLuego (res[i] = res[j] \implica i = j)}}}
+        \paraTodo{j}{\Z}{0 \leq j < \norm{res}\implicaLuego (res[i] = res[j] \leftrightarrow i = j)}}}
         % con el existencial es necesario chequear el rango en el que es valido???
 }
 \end{proc}

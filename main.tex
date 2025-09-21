@@ -374,9 +374,10 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     \aseguraLargo{
         % aca uso es si y solo si para que solo tenga esos elementos
         \paraTodo{a}{Alumno}{(a \in edr.entregas \land \lnot (a \in edr.copiones)) \leftrightarrow\\
+        tupla\tupla{a, nota(a, edr.solucion)} \in res\yLuego\\
         % me fijo que la tupla este una sola vez
-        \existe{i}{\Z}{0 \leq i < \norm{res} \yLuego res[i] = tupla\tupla{a, nota(a, edr.solucion)}\yLuego\\
-        \neg \existe{j}{\Z}{0 \leq j < \norm{res}\yLuego res[i] = res[j]}}}
+        \paraTodo{i}{\Z}{0 \leq i < \norm{res} \implicaLuego
+        \paraTodo{j}{\Z}{0 \leq j < \norm{res}\implicaLuego (res[i] = res[j] \implica i = j)}}}
         % con el existencial es necesario chequear el rango en el que es valido???
 }
 \end{proc}

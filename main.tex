@@ -46,7 +46,7 @@ En proc \textit{chequearCopias}, en el aux \textit{porcentajeRespuestasIgualAdya
 \section{Especificacion}
 
 $Nota\ ES\ \Z$\\
-$Respuesta\ ES\ Char$\\
+$Respuesta\ ES\ \Z$\\
 $Examen\ ES\ \seq{Respuesta}$\\
 $Coordenada\ ES\ struct\struct{f:\Z, c:\Z}$\\
 $Alumno\ ES\ struct\struct{coord:Coordenada, examen:Examen}$\\
@@ -106,7 +106,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 \\ \\
 % Las respuestas del examen estan en el rango de opciones
 \predLargo{rtaValida}{s: Examen}{
-    \paraTodo{i}{\Z}{0 \leq i < \norm{s} \implicaLuego s[i] \in \conj{"0","1","2","3","4","5","6","7","8","9"}}
+    \paraTodo{i}{\Z}{0 \leq i < \norm{s} \implicaLuego 0 \leq s[i] \leq 9}
 }
 
 % si c y f estan entre las dimensiones de aula la coordenada es valida 
@@ -142,7 +142,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 % El examen no tiene ninguna respuesta
 \predLargo{examenInicializado}{e: Examen, sol: Examen}{
     \norm{e} = \norm{sol} \yLuego
-    \paraTodo{i}{\Z}{0 \leq i < \norm{e} \implicaLuego e[i] = ""}
+    \paraTodo{i}{\Z}{0 \leq i < \norm{e} \implicaLuego e[i] = -1}
 }
 
 \subsection{proc igualdad}
@@ -185,7 +185,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     \aseguraLargo{
         \existe{i}{\Z}{0\leq i < \norm{a1.examen}\yLuego \existe{a2}{alumno}{\\
             perteneceAlumno(a2, edr_0.aula) \yLuego \\
-            (puedeCopiarse(a1.coord, a3.coord, edr_0.aula)\land\\
+            (puedeCopiarse(a1.coord, a2.coord, edr_0.aula)\land\\
             suExamen(a1.coord, edr_0.aula)[i]= "" \land \\
             suExamen(a2.coord, edr_0.aula)[i] \neq "" \land\\
             suExamen(a1.coord, edr.aula)[i] = suExamen(a2.coord, edr.aula)[i]\land\\

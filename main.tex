@@ -71,10 +71,10 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 \obs{solucion}{Examen}
 \\
 \obs{entregas}{\conj{Alumno}}
-\\
-\obs{sospechosos}{\conj{Alumno}}
+
 \subsection{proc EdR}
 % Metodo EdR --------------------------------------------------
+
 \begin{proc}{EdR}
 {
 \In dimensionAula: \Z,
@@ -95,9 +95,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     \\ noHayAlumnosJuntos(res.aula) \yLuego
     \\ todosAlumnosConCoordenada(res.aula) \yLuego
     \\ res.solucion = s \yLuego 
-    \\ res.entregas = \conj{} \yLuego
-    \\ res.sospechosos = \conj{}
-    }
+    \\ res.entregas = \conj{}}
 \end{proc}
 
 % Todos los espacios en el aula tienen su coordenada en el struct
@@ -116,7 +114,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 
 % La cantidad de estudiantes a lo sumo no hace que haya alumnos juntos
 \predLargo{cantValidaEstudiantes}{a, c: \Z}{
-    (c \leq ifThenElse(mod(a,2)=0, \frac{a^ 2}{2}, \frac{a + 1}{2} * a))    
+    (c \leq ifThenElse(mod(a,2)=0, \frac{a^ 2}{2}, \frac{a^ 2 + a}{2}))    
 }
 
 % el aula tiene misma cantidad de filas y columnas
@@ -159,8 +157,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     \aseguraLargo{res = True \leftrightarrow
     \\ (edr_1.aula = edr_2.aula \land
     \\ edr_1.solucion = edr_2.solucion \land
-    \\ edr_1.entregas = edr_2.entregas \land
-    \\ edr_1.sospechosos = edr_2.sospechosos)
+    \\ edr_1.entregas = edr_2.entregas)
     }
 \end{proc}
 
@@ -180,24 +177,23 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
         perteneceAlumno(a1, edr.aula) \yLuego\\
         \existe{i}{\Z}{0\leq i < \norm{a1.examen}\yLuego \existe{a2}{alumno}{\\
         perteneceAlumno(a2, edr.aula)\ \yLuego\\
-        (enRango(a1.coord, a2.coord, edr.aula) \land\\
+        (puedeCopiarse(a1.coord, a2.coord, edr.aula) \land\\
         suExamen(a1.coord, edr.aula)[i] = "" \land\\
         suExamen(a2.coord, edr.aula)[i] \neq "")}}\yLuego
         (edr_0 = edr)
     }
     \aseguraLargo{
-        \existe{j}{\Z}{0\leq j < \norm{a1.examen}\yLuego \existe{a3}{alumno}{\\
-            perteneceAlumno(a3, edr_0.aula) \yLuego \\
-            (enRango(a1.coord, a3.coord, edr_0.aula)\land\\
-            suExamen(a1.coord, edr_0.aula)[j]= "" \land \\
-            suExamen(a3.coord, edr_0.aula)[j] \neq "" \land\\
-            suExamen(a1.coord, edr.aula)[j] = suExamen(a3.coord, edr.aula)[j]\land\\
-            mismosEjerciciosMenos(j, suExamen(a1.coord, edr.aula), a1.examen))\\
+        \existe{i}{\Z}{0\leq i < \norm{a1.examen}\yLuego \existe{a2}{alumno}{\\
+            perteneceAlumno(a2, edr_0.aula) \yLuego \\
+            (puedeCopiarse(a1.coord, a3.coord, edr_0.aula)\land\\
+            suExamen(a1.coord, edr_0.aula)[i]= "" \land \\
+            suExamen(a2.coord, edr_0.aula)[i] \neq "" \land\\
+            suExamen(a1.coord, edr.aula)[i] = suExamen(a2.coord, edr.aula)[i]\land\\
+            mismosEjerciciosMenos(i, suExamen(a1.coord, edr.aula), a1.examen))\\
         }}\yLuego\\
         todosEstudiantesIgualesMenos(\langle a1.coord \rangle ,edr.aula,edr0.aula)\yLuego 
         \\ (edr_0.solucion = edr.solucion) \yLuego
-        \\ (edr_0.entregas = edr.entregas) \yLuego
-        \\ (edr_0.sospechosos = edr.sospechosos) \yLuego
+        \\ (edr_0.entregas = edr.entregas)
     } 
 \end{proc}
 \\
@@ -222,12 +218,11 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 
 % las coordenadas del alumno estan en el aula y el examen es el mismo
 \predLargo{perteneceAlumno}{e: Alumno, a:Aula}{
-    (coordenadaValida(e.coord, a) \yLuego suExamen(e.coord, a) \neq \langle \rangle \yLuego\\
-    suExamen(e.cord, a) = e.examen)
+    (coordenadaValida(e.coord, a) \yLuego suExamen(e.coord, a) \neq \langle \rangle \yLuego \\ suExamen(e.cord, a) = e.examen)
 }
 
 % las coordenadas estan dentro del aula y c0 esta a distancia |2| de c1 en x o esta directamente adelante en y
-\predLargo{enRango}{c1, c2: Coordenada, a: Aula}{
+\predLargo{puedeCopiarse}{c1, c2: Coordenada, a: Aula}{
     coordenadaValida(c1, a) \land coordenadaValida(c2, a) \land
     \\ ((\norm{c2.c - c1.c} = 2 \land c2.f = c1.f) \lor
     \\ (c2.c = c1.c \land  c2.f - c1.f = 1))
@@ -259,8 +254,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     \\ suExamen(c1,edr.aula) = s)}} \yLuego
     \\todosEstudiantesIgualesMenos(seCopian,edr.aula, edr_0.aula) \yLuego
     \\edr.solucion = edr_0.solucion \yLuego
-    \\edr.entregas = edr_0.entregas \yLuego
-    \\edr.sospechosos = edr_0.sospechosos \yLuego
+    \\edr.entregas = edr_0.entregas
 }
 \end{proc}
 \subsection{proc resolver}
@@ -292,8 +286,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
         % vv Todo el resto sigue igual
         todosEstudiantesIgualesMenos(\langle a.coord \rangle, edr.aula, edr_0.aula)\yLuego\\ 
         edr_0.solucion = edr.solucion \yLuego\\
-        edr_0.entregas = edr.entregas \yLuego\\
-        edr_0.sospechosos = edr.sospechosos \yLuego
+        edr_0.entregas = edr.entregas
     }
 \end{proc}
 
@@ -307,8 +300,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 
 % el ejercicio i del examen fue resuelto
 \predLargo{respondio}{i: \Z, e: Examen}{
-    (0 \leq i < \norm{e}) \yLuego\\
-    e[i]\in \conj{"0","1","2","3","4","5","6","7","8","9"}
+    (0 \leq i < \norm{e}) \yLuego e[i] \neq ""
 }
 
 \subsection{proc entregar}
@@ -328,8 +320,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
         (edr.entregas = edr_0.entregas \cup \conj{a}) \yLuego
         \\ (suExamen(a.coord, edr.aula) = \langle \rangle) \yLuego
         \\ (todosEstudiantesIgualesMenos(\langle a.coord \rangle,edr,edr_0)) \yLuego
-        \\ (edr.solucion = edr_0.solucion) \yLuego
-        \\ (edr.sospechosos = edr_0.sospechosos) \yLuego
+        \\ (edr.solucion = edr_0.solucion)
     }
 \end{proc}
 
@@ -342,14 +333,11 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 \Tipo{\seq{Alumno}}
 }
     \requiere{todosEntregaron(edr)} 
-    \aseguraLargo{
-        \paraTodo {a1}{Alumno}{(a1 \in edr.entregas) \implicaLuego ((a1 \in res) \leftrightarrow 
-        \\ (\existe{a2}{Alumno}{a2 \in edr.entregas  \land  enRango(a1.coord, a2.coord, edr.aula) \land 
-        \\ porcentajeRespuestasIgualAdyacente(a1, a2) > 60} \ \lor \\porcentajeIgualAula(a1, edr.entregas) > 25))}\yLuego
-        \\ \norm{edr.sospechosos} = \norm{res} \yLuego
-        \\ \paraTodo{a3}{Alumno}{a3 \in edr.sospechosos \leftrightarrow a3 \in res}
+    \asegura{
+        \paraTodo {a1}{Alumno}{a1 \in edr.entregas \implicaLuego (a1 \in res \leftrightarrow esSospechoso(a1))}
         }
 \end{proc}
+\\
 
 % devuelve el porcentaje de respuestas iguales entre 2 alumnos
 \aux{porcentajeRespuestasIgualAdyacente}{a1, a2: Alumno}{\Z}
@@ -367,6 +355,11 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     \\ suExamen(c1, edr.aula) = \langle \rangle}
 }
 
+\predLargo{esSospechoso}{edr: EdR, a1: Alumno}{
+    \existe{a2}{Alumno}{a2 \in edr.entregas  \land  puedeCopiarse(a1.coord, a2.coord, edr.aula) \land 
+    \\ porcentajeRespuestasIgualAdyacente(a1, a2) > 60} \ \lor \\porcentajeIgualAula(a1, edr.entregas) > 25
+}
+
 \subsection{proc corregir}
 % Metodo corregir --------------------------------------------------
 \begin{proc}{corregir} 
@@ -378,14 +371,16 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     \requiere{todosEntregaron(edr)}
     \aseguraLargo{
         % aca uso es si y solo si para que solo tenga esos elementos
-        \paraTodo{a}{Alumno}{(a \in edr.entregas \land \lnot (a \in edr.sospechosos)) \leftrightarrow\\
-        tupla\tupla{a, nota(a, edr.solucion)} \in res\yLuego\\
+        \paraTodo{a}{Alumno}{(a \in edr.entregas \land \lnot esSospechoso(edr, a)) \leftrightarrow\\
+        tupla\tupla{a, nota(a, edr.solucion)} \in res}\yLuego
         % me fijo que la tupla este una sola vez
-        \paraTodo{i}{\Z}{0 \leq i < \norm{res} \implicaLuego
-        \paraTodo{j}{\Z}{0 \leq j < \norm{res}\implicaLuego (res[i] = res[j] \leftrightarrow i = j)}}}
-        % con el existencial es necesario chequear el rango en el que es valido???
+        noRepetidos(res)
 }
 \end{proc}
+
+\predLargo{noRepetidos}{s: \seq{tupla\tupla{Alumno, Nota}}}{
+    \paraTodo{i, j}{\Z}{0 \leq i < \norm{res} \land 0 \leq j < \norm{res} \implicaLuego (res[i] = res[j] \leftrightarrow i = j)}
+}
 
 % Suma todas las respuestas correctas, lo divide por la cantidad de respuestas y lo multiplica por 10 (standar)
 \aux{nota}{a: Alumno, sol: Examen}{\Z}

@@ -261,40 +261,43 @@ Chequea que la cantidad de estudiantes sea menor o igual a los que entran en el 
 \begin{proc}{resolver}
 {
 \Inout edr: EdR,
-\Inout a: Alumno,
+\In a: Alumno,
 \In e: \seq{Examen}
 }{
 \Tipo{\seq{Examen}}
 }
     \requiereLargo{
-    perteneceAlumno(a, edr.aula)\yLuego\\
-    examenInicializado(a.examen, edr.solucion)\yLuego\\
-    \norm{e} > 0 \yLuego\\
-    edr_0 = edr \yLuego\\
-    a_0 = a
+    perteneceAlumno(a, edr.aula)\land\\
+    examenInicializado(a.examen, edr.solucion)\land\\
+    \norm{e} > 0 \land\\
+    edr_0 = edr
     }
     \aseguraLargo{
         % vv el examen q devolvemos tiene t+1 pasos
         \norm{res} = \norm{e} + 1\yLuego\\
         % aca me aseguro que en el paso t+1 resuelvo un ejercicio que en el paso t no estaba resuelto vv
-        hayNuevoEjercicioResuelto(e[\norm{e}-1], a.examen)\land\\
+        hayNuevoEjercicioResuelto(e[\norm{e}-1], res[\norm{res}-1])\land\\
         % vv aca me fijo que el resto de pasos esten igual
-        res = e ++ \langle a.examen\rangle \yLuego\\
+        e = subseq(res, 0, \norm{res}-1)\land\\
         % vv igualo el examen en edr con el examen q devuelvo
-        edr.aula[a.coord.f][a.coord.c] = a\yLuego\\
+        alumnoTieneEsteExamen(res[\norm{res}-1], a.coord, edr.aula)\land\\
         % vv Todo el resto sigue igual
-        todosEstudiantesIgualesMenos(\langle a.coord \rangle, edr.aula, edr_0.aula)\yLuego\\ 
-        edr_0.solucion = edr.solucion \yLuego\\
+        todosEstudiantesIgualesMenos(\langle a.coord \rangle, edr.aula, edr_0.aula)\land\\ 
+        edr_0.solucion = edr.solucion \land\\
         edr_0.entregas = edr.entregas
     }
 \end{proc}
 
+\predLargo{alumnoTieneEsteExamen}{e: Examen, c: Coordenada, a: Aula}{
+    a[c.f][c.c] = \struct{coord:c, examen:e}
+}
+
 % existe solo 1 ejercicio con respuesta nueva en e1 que en e0 no estaba
 \predLargo{hayNuevoEjercicioResuelto}{e0, e1: Examen}{
-        (\exists k: \Z)(0 \leq k < \norm{e0} \yLuego
-        mismosEjerciciosMenos(k, e1, e0) \land\\
+        (\exists k: \Z)(0 \leq k < \norm{e0} \yLuego\\
+        (mismosEjerciciosMenos(k, e1, e0) \land
         \lnot respondio(k, e0) \land
-        respondio(k, e1))
+        respondio(k, e1)))
 }
 
 % el ejercicio i del examen fue resuelto

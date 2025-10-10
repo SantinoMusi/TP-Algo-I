@@ -178,7 +178,6 @@ Chequea que la cantidad de estudiantes sea menor o igual a los que entran en el 
         \existe{i}{\Z}{0\leq i < \norm{a1.examen}\yLuego \existe{a2}{alumno}{\\
         perteneceAlumno(a2, edr.aula)\ \yLuego\\
         (puedeCopiarse(a1.coord, a2.coord, edr.aula) \land\\
-        suExamen(a1.coord, edr.aula)[i] = -1 \land\\
         suExamen(a2.coord, edr.aula)[i] \neq -1)}}\yLuego
         \\(edr_0 = edr)
     }
@@ -186,9 +185,8 @@ Chequea que la cantidad de estudiantes sea menor o igual a los que entran en el 
         \existe{i}{\Z}{0\leq i < \norm{a1.examen}\yLuego \existe{a2}{alumno}{\\
             perteneceAlumno(a2, edr_0.aula) \yLuego \\
             (puedeCopiarse(a1.coord, a2.coord, edr_0.aula)\land\\
-            suExamen(a1.coord, edr_0.aula)[i]= -1 \land \\
             suExamen(a2.coord, edr_0.aula)[i] \neq -1 \land\\
-            suExamen(a1.coord, edr.aula)[i] = suExamen(a2.coord, edr.aula)[i]\land\\
+            suExamen(a1.coord, edr.aula)[i] = suExamen(a2.coord, edr_0.aula)[i]\land\\
             mismosEjerciciosMenos(i, suExamen(a1.coord, edr.aula), a1.examen))\\
         }}\yLuego\\
         todosEstudiantesIgualesMenos(\langle a1.coord \rangle ,edr.aula,edr0.aula)\yLuego 

@@ -162,10 +162,8 @@ Chequea que la cantidad de estudiantes sea menor o igual a los que entran en el 
 \end{proc}
 
 \subsection{proc copiarse}
+
 % Metodo copiarse --------------------------------------------------
-
-% CAMBIAR EL METODO COPIARSE YA QUE NO EXISTE MAS ultimoPasoExamen()
-
 \begin{proc}{copiarse}
 {
 \In a1: Alumno,
@@ -174,23 +172,22 @@ Chequea que la cantidad de estudiantes sea menor o igual a los que entran en el 
 \Tipo{}
 }
     \requiereLargo{ 
-        perteneceAlumno(a1, edr.aula) \yLuego\\
-        \existe{i}{\Z}{0\leq i < \norm{a1.examen}\yLuego \existe{a2}{alumno}{\\
-        perteneceAlumno(a2, edr.aula)\ \yLuego\\
+        perteneceAlumno(a1, edr.aula) \land\\
+        \existe{a2}{alumno}{perteneceAlumno(a2, edr.aula)\yLuego\\
         (puedeCopiarse(a1.coord, a2.coord, edr.aula) \land\\
-        suExamen(a2.coord, edr.aula)[i] \neq -1)}}\yLuego
-        \\(edr_0 = edr)
+        respondioAlgunEjercicio(a2.examen))}\land\\
+        (edr_0 = edr)
     }
     \aseguraLargo{
         \existe{i}{\Z}{0\leq i < \norm{a1.examen}\yLuego \existe{a2}{alumno}{\\
             perteneceAlumno(a2, edr_0.aula) \yLuego \\
             (puedeCopiarse(a1.coord, a2.coord, edr_0.aula)\land\\
-            suExamen(a2.coord, edr_0.aula)[i] \neq -1 \land\\
+            respondio(i, suExamen(a2.coord, edr_0.aula)) \land\\
             suExamen(a1.coord, edr.aula)[i] = suExamen(a2.coord, edr_0.aula)[i]\land\\
             mismosEjerciciosMenos(i, suExamen(a1.coord, edr.aula), a1.examen))\\
-        }}\yLuego\\
-        todosEstudiantesIgualesMenos(\langle a1.coord \rangle ,edr.aula,edr0.aula)\yLuego 
-        \\ (edr_0.solucion = edr.solucion) \yLuego
+        }}\land\\
+        todosEstudiantesIgualesMenos(\langle a1.coord \rangle ,edr.aula,edr0.aula)\land
+        \\ (edr_0.solucion = edr.solucion) \land
         \\ (edr_0.entregas = edr.entregas)
     } 
 \end{proc}
@@ -226,6 +223,10 @@ Chequea que la cantidad de estudiantes sea menor o igual a los que entran en el 
     \\ (c2.c = c1.c \land  c2.f - c1.f = 1))
 }
 
+\predLargo{respondioAlgunEjercicio}{e:Examen}{
+    \existe{i}{\Z}{respondio(i, e)}
+}
+    
 % devuelve el examen del alumno en c1
 \aux{suExamen}{c1:Coordenada, a: Aula}{Examen} \ $a[c1.f][c1.c].examen$
 
@@ -298,7 +299,7 @@ Chequea que la cantidad de estudiantes sea menor o igual a los que entran en el 
 
 % el ejercicio i del examen fue resuelto
 \predLargo{respondio}{i: \Z, e: Examen}{
-    (0 \leq i < \norm{e}) \yLuego e[i] \neq ""
+    (0 \leq i < \norm{e}) \yLuego e[i] \neq -1
 }
 
 \subsection{proc entregar}
@@ -381,7 +382,7 @@ Chequea que la cantidad de estudiantes sea menor o igual a los que entran en el 
 }
 
 % Suma todas las respuestas correctas, lo divide por la cantidad de respuestas y lo multiplica por 10 (standar)
-\aux{nota}{a: Alumno, sol: Examen}{\Z}
+\aux{nota}{a: Alumno, sol: Examen}{\R}
     \\ $((\sum_{i=0}^{\norm{sol}-1}ifThenElse(a.examen[i] = sol[i], 1, 0))) \cdot \frac{10}{\norm{sol}}$
 
 \end{tad}

@@ -335,7 +335,8 @@ Chequea que la cantidad de estudiantes presentes sea menor o igual a los que ent
 }
     \requiere{todosEntregaron(edr)} 
     \asegura{
-        \paraTodo {a1}{Alumno}{a1 \in edr.entregas \implicaLuego (a1 \in res \leftrightarrow esSospechoso(a1))}
+        \paraTodo {a1}{Alumno}{a1 \in edr.entregas \implicaLuego (a1 \in res \leftrightarrow esSospechoso(a1)) \land \\
+        \paraTodo{i, j}{\Z}{0 \leq i < \norm{res} \land 0 \leq j < \norm{res} \implicaLuego (res[i] = res[j] \leftrightarrow i = j)}}
         }
 \end{proc}
 \\
@@ -375,13 +376,10 @@ Chequea que la cantidad de estudiantes presentes sea menor o igual a los que ent
         \paraTodo{a}{Alumno}{(a \in edr.entregas \land \lnot esSospechoso(edr, a)) \leftrightarrow\\
         tupla\tupla{a, nota(a, edr.solucion)} \in res} \land \\
         % me fijo que la tupla este una sola vez
-        noRepetidos(res)
+        \paraTodo{i, j}{\Z}{0 \leq i < \norm{res} \land 0 \leq j < \norm{res} \implicaLuego (res[i] = res[j] \leftrightarrow i = j)}
 }
 \end{proc}
-
-\predLargo{noRepetidos}{s: \seq{tupla\tupla{Alumno, Nota}}}{
-    \paraTodo{i, j}{\Z}{0 \leq i < \norm{res} \land 0 \leq j < \norm{res} \implicaLuego (res[i] = res[j] \leftrightarrow i = j)}
-}
+\\
 
 % Suma todas las respuestas correctas, lo divide por la cantidad de respuestas y lo multiplica por 10 (standar)
 \aux{nota}{a: Alumno, sol: Examen}{\R}

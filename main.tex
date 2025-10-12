@@ -141,7 +141,7 @@ Chequea que la cantidad de estudiantes presentes sea menor o igual a los que ent
 
 % El examen no tiene ninguna respuesta
 \predLargo{examenInicializado}{e: Examen, sol: Examen}{
-    \norm{e} = \norm{sol} \yLuego
+    \norm{e} = \norm{sol} \land
     \paraTodo{i}{\Z}{0 \leq i < \norm{e} \implicaLuego e[i] = -1}
 }
 
@@ -213,7 +213,7 @@ Chequea que la cantidad de estudiantes presentes sea menor o igual a los que ent
 
 % las coordenadas del alumno estan en el aula y el examen es el mismo
 \predLargo{perteneceAlumno}{e: Alumno, a:Aula}{
-    (coordenadaValida(e.coord, a) \yLuego suExamen(e.coord, a) \neq \langle \rangle \yLuego \\ suExamen(e.cord, a) = e.examen)
+    e.examen \neq \langle \rangle \land coordenadaValida(e.coord, a) \land \\ suExamen(e.cord, a) = e.examen
 }
 
 % las coordenadas estan dentro del aula y c0 esta a distancia |2| de c1 en x o esta directamente adelante en y
@@ -249,8 +249,8 @@ Chequea que la cantidad de estudiantes presentes sea menor o igual a los que ent
     \existe {n}{\Z}{0 \leq n \leq posiblesAccesos \land 0 \leq n \leq cuantosEstudiantes(edr.aula) \land
     \\ \existe {seCopian}{\seq{Coordenada}}{\norm{seCopian} = n \land 
     \\ \paraTodo{c1}{Coordenada}{c1 \in seCopian \leftrightarrow 
-    \\(coordenadaValida(c1,edr_0.aula) \yLuego suExamen(c1, edr_0.aula) \neq \langle \rangle \land
-    \\ suExamen(c1,edr.aula) = s)} \land
+    (coordenadaValida(c1,edr_0.aula) \yLuego \\ suExamen(c1, edr_0.aula) \neq \langle \rangle \land
+    suExamen(c1,edr.aula) = s)} \land
     \\todosEstudiantesIgualesMenos(seCopian,edr.aula, edr_0.aula)}} \land
     \\edr.solucion = edr_0.solucion \land
     \\edr.entregas = edr_0.entregas
@@ -274,7 +274,7 @@ Chequea que la cantidad de estudiantes presentes sea menor o igual a los que ent
     }
     \aseguraLargo{
         % vv el examen q devolvemos tiene t+1 pasos
-        \norm{res} = \norm{e} + 1\yLuego\\
+        \norm{res} = \norm{e} + 1\land\\
         % aca me aseguro que en el paso t+1 resuelvo un ejercicio que en el paso t no estaba resuelto vv
         hayNuevoEjercicioResuelto(e[\norm{e}-1], res[\norm{res}-1])\land\\
         % vv aca me fijo que el resto de pasos esten igual
@@ -302,7 +302,7 @@ Chequea que la cantidad de estudiantes presentes sea menor o igual a los que ent
 
 % el ejercicio i del examen fue resuelto
 \predLargo{respondio}{i: \Z, e: Examen}{
-    (0 \leq i < \norm{e}) \yLuego e[i] \neq -1
+    0 \leq i < \norm{e} \yLuego e[i] \neq -1
 }
 
 \subsection{proc entregar}

@@ -84,17 +84,17 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 \Tipo{EdR}
 }
     \requiereLargo{
-    dimensionAula > 0 \yLuego
-    \\ rtaValida(s) \yLuego
+    dimensionAula > 0 \land
+    \\ rtaValida(s) \land
     \\ cantValidaEstudiantes(dimensionAula, cantEstudiantes)}
     \aseguraLargo{
-    \norm{res.aula} = dimensionAula \yLuego
-    \\ aulaCuadrada(res.aula) \yLuego
-    \\ cuantosEstudiantes(res.aula) = cantEstudiantes \yLuego
-    \\ examenesInicializados(res.aula, s) \yLuego
-    \\ noHayAlumnosJuntos(res.aula) \yLuego
-    \\ todosAlumnosConCoordenada(res.aula) \yLuego
-    \\ res.solucion = s \yLuego 
+    \norm{res.aula} = dimensionAula \land
+    \\ aulaCuadrada(res.aula) \land
+    \\ cuantosEstudiantes(res.aula) = cantEstudiantes \land
+    \\ examenesInicializados(res.aula, s) \land
+    \\ noHayAlumnosJuntos(res.aula) \land
+    \\ todosAlumnosConCoordenada(res.aula) \land
+    \\ res.solucion = s \land 
     \\ res.entregas = \conj{}}
 \end{proc}
 
@@ -115,7 +115,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 \predLargo{cantValidaEstudiantes}{a, c: \Z}{
     (0 \leq c \leq ifThenElse(mod(a,2)=0, \frac{a^ 2}{2}, \frac{a^ 2 + a}{2}))    
 }
-Chequea que la cantidad de estudiantes sea menor o igual a los que entran en el aula manteniendo la separación de al menos 1 asiento entre cada uno \\
+Chequea que la cantidad de estudiantes presentes sea menor o igual a los que entran en el aula manteniendo la separación de al menos 1 asiento entre cada uno \\
 
 % el aula tiene misma cantidad de filas y columnas
 \predLargo{aulaCuadrada}{a: Aula}{
@@ -172,7 +172,7 @@ Chequea que la cantidad de estudiantes sea menor o igual a los que entran en el 
 \Tipo{}
 }
     \requiereLargo{ 
-        perteneceAlumno(a1, edr.aula) \land\\
+        perteneceAlumno(a1, edr.aula) \yLuego\\
         \existe{a2}{alumno}{perteneceAlumno(a2, edr.aula)\yLuego\\
         (puedeCopiarse(a1.coord, a2.coord, edr.aula) \land\\
         respondioAlgunEjercicio(a2.examen))}\land\\
@@ -240,19 +240,19 @@ Chequea que la cantidad de estudiantes sea menor o igual a los que entran en el 
 \Inout edr: EdR
 }{}
     \requiereLargo{
-    edr = edr_0 \yLuego
-    \\rtaValida(s) \yLuego
-    \\\norm{s} = \norm{edr.solucion} \yLuego
+    edr = edr_0 \land
+    \\rtaValida(s) \land
+    \\\norm{s} = \norm{edr.solucion} \land
     \\posiblesAccesos \geq 0
     }
     \aseguraLargo{
-    \existe {n}{\Z}{0 \leq n \leq posiblesAccesos \land 0 \leq n \leq cuantosEstudiantes(edr.aula)} \land
+    \existe {n}{\Z}{0 \leq n \leq posiblesAccesos \land 0 \leq n \leq cuantosEstudiantes(edr.aula) \land
     \\ \existe {seCopian}{\seq{Coordenada}}{\norm{seCopian} = n \land 
     \\ \paraTodo{c1}{Coordenada}{c1 \in seCopian \leftrightarrow 
     \\(coordenadaValida(c1,edr_0.aula) \yLuego suExamen(c1, edr_0.aula) \neq \langle \rangle \land
-    \\ suExamen(c1,edr.aula) = s)}} \yLuego
-    \\todosEstudiantesIgualesMenos(seCopian,edr.aula, edr_0.aula) \yLuego
-    \\edr.solucion = edr_0.solucion \yLuego
+    \\ suExamen(c1,edr.aula) = s)} \land
+    \\todosEstudiantesIgualesMenos(seCopian,edr.aula, edr_0.aula)}} \land
+    \\edr.solucion = edr_0.solucion \land
     \\edr.entregas = edr_0.entregas
 }
 \end{proc}
@@ -314,15 +314,14 @@ Chequea que la cantidad de estudiantes sea menor o igual a los que entran en el 
 }{
 }
     \requiereLargo{
-        (perteneceAlumno(a, edr.Aula)) \yLuego
-        \\ (edr = edr_0)
+        perteneceAlumno(a, edr.Aula) \land \\ edr = edr_0
     } 
     \aseguraLargo{
         % CAMBIO EL a.examen, ANTES REVISABA EL ULTIMO PASO
-        (edr.entregas = edr_0.entregas \cup \conj{a}) \yLuego
-        \\ (suExamen(a.coord, edr.aula) = \langle \rangle) \yLuego
-        \\ (todosEstudiantesIgualesMenos(\langle a.coord \rangle,edr,edr_0)) \yLuego
-        \\ (edr.solucion = edr_0.solucion)
+        edr.entregas = edr_0.entregas \cup \conj{a} \land
+        \\ suExamen(a.coord, edr.aula) = \langle \rangle \land
+        \\ todosEstudiantesIgualesMenos(\langle a.coord \rangle,edr,edr_0) \land
+        \\ edr.solucion = edr_0.solucion
     }
 \end{proc}
 
@@ -374,7 +373,7 @@ Chequea que la cantidad de estudiantes sea menor o igual a los que entran en el 
     \aseguraLargo{
         % aca uso es si y solo si para que solo tenga esos elementos
         \paraTodo{a}{Alumno}{(a \in edr.entregas \land \lnot esSospechoso(edr, a)) \leftrightarrow\\
-        tupla\tupla{a, nota(a, edr.solucion)} \in res}\yLuego
+        tupla\tupla{a, nota(a, edr.solucion)} \in res} \land \\
         % me fijo que la tupla este una sola vez
         noRepetidos(res)
 }

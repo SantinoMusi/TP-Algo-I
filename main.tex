@@ -50,7 +50,7 @@ $Respuesta\ ES\ \Z$\\
 $Examen\ ES\ \seq{Respuesta}$\\
 $Coordenada\ ES\ struct\struct{f:\Z, c:\Z}$\\
 $Alumno\ ES\ struct\struct{coord:Coordenada, examen:Examen}$\\
-$Aula\ ES\ \seq{\seq{Alumno}}$\\
+$Aula\ ES\ dicc\struct{Coordenada, Examen}$\\
 \\
 % Acá arrancamos el TAD --------------------------------------------------
 \begin{tad}{EdR}
@@ -88,55 +88,40 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     \\ rtaValida(s) \land
     \\ cantValidaEstudiantes(dimensionAula, cantEstudiantes)}
     \aseguraLargo{
-    \norm{res.aula} = dimensionAula \land
-    \\ aulaCuadrada(res.aula) \land
-    \\ cuantosEstudiantes(res.aula) = cantEstudiantes \land
-    \\ examenesInicializados(res.aula, s) \land
-    \\ noHayAlumnosJuntos(res.aula) \land
-    \\ todosAlumnosConCoordenada(res.aula) \land
-    \\ res.solucion = s \land 
+    \norm{res.aula} = cantEstudiantes \yLuego\\
+    coordenadasValidas(res.aula, dimensionAula) \yLuego
+    \\ examenesInicializados(res.aula, s) \yLuego
+    \\ noHayAlumnosJuntos(res.aula) \yLuego
+    \\ res.solucion = s \yLuego 
     \\ res.entregas = \conj{}}
 \end{proc}
 
-% Todos los espacios en el aula tienen su coordenada en el struct
-\predLargo{todosAlumnosConCoordenada}{a: aula}{
-    \paraTodo{c1}{Coordenada}{coordenadaValida(c1,a) \implicaLuego
-    \\(a[c1.f][c1.c].coord.f = c1.f \land a[c1.f][c1.c].coord.c = c1.c)}
-}
-\\ \\
 % Las respuestas del examen estan en el rango de opciones
-\predLargo{rtaValida}{s: Examen}{
+\pred{rtaValida}{s: Examen}{
     \paraTodo{i}{\Z}{0 \leq i < \norm{s} \implicaLuego 0 \leq s[i] \leq 9}
 }
 
+\predLargo{coordenadasValida}{a:Aula, n: \Z}{
+    \paraTodo{c}{Coordenada}{c\in a \rightarrow (0 \leq c.c < n \land 0 \leq c.f < n)}
+}
+
 % si c y f estan entre las dimensiones de aula la coordenada es valida 
-\predLargo{coordenadaValida}{coord:Coordenada, a:Aula}{0 \leq coord.f < \norm{a} \land 0 \leq coord.c < \norm{a}}
-\\
+% REMPLAZAR TODAS LAS APARICIONES CON "c \in a"
+% \predLargo{coordenadaValida}{coord:Coordenada, a:Aula}{0 \leq coord.f < \norm{a} \land 0 \leq coord.c < \norm{a}}
+% \\
+%Chequea que la cantidad de estudiantes sea menor o igual a los que entran en el aula manteniendo la separación de al menos 1 asiento entre cada uno \\
 \predLargo{cantValidaEstudiantes}{a, c: \Z}{
     (0 \leq c \leq ifThenElse(mod(a,2)=0, \frac{a^ 2}{2}, \frac{a^ 2 + a}{2}))    
-}
-Chequea que la cantidad de estudiantes presentes sea menor o igual a los que entran en el aula manteniendo la separación de al menos 1 asiento entre cada uno \\
-
-% el aula tiene misma cantidad de filas y columnas
-\predLargo{aulaCuadrada}{a: Aula}{
-    \paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego \norm{a[i]} = \norm{a}}
-}
-
+}\\
 % si hay un alumno en el asiento entonces, el que le sigue tiene que ser vacio
 \predLargo{noHayAlumnosJuntos}{a: Aula}{
-    \paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego 
-    \\ \paraTodo{j}{\Z}{(0 \leq j < \norm{a[i]}-1 \yLuego a[i][j].examen \neq \langle \rangle) \implicaLuego a[i][j+1].examen = \langle \rangle}}
+    \paraTodo{c}{Coordenada}{c\in a \rightarrow
+    \struct{c.f,\ c.c+1} \notin a}
 }
-
-% cuantos estudiantes hay en el aula
-\aux{cuantosEstudiantes}{a: Aula}{\Z} \\
-    $\sum_{i=0}^{\norm{a}-1} \sum_{j=0}^{\norm{a[i]}-1} ifThenElse(a[i][j].examen \neq \langle \rangle,1,0)$
-\\
 
 % todos los examenes en el aula estan sin responder y son del largo correcto
 \predLargo{examenesInicializados}{a: Aula, sol: Examen}{
-    \paraTodo{c1}{Coordenada}{(coordenadaValida(c1, a) \yLuego suExamen(c1, a) \neq \langle \rangle) \implicaLuego 
-    \\ examenInicializado(a[c1.f][c1.c].examen, sol)}
+    \paraTodo{c}{Coordenada}{c\in a \implicaLuego examenInicializado(a[c], sol)}
 }
 
 % El examen no tiene ninguna respuesta
@@ -195,13 +180,13 @@ Chequea que la cantidad de estudiantes presentes sea menor o igual a los que ent
 
 % a1 y a2 tienen la misma norma y son cuadradas
 \predLargo{mismasDimensiones}{a1,a2: Aula}{
-    \norm{a1}=\norm{a2} \land aulaCuadrada(a1) \land aulaCuadrada(a2)
+    \norm{a1}=\norm{a2}
 }
 
 % Las aulas son iguales en todas las coordenadas menos en las especificadas en coords 
 \predLargo{todosEstudiantesIgualesMenos}{coords: \seq{Coordenada}, a0, a1: Aula}{
         mismasDimensiones(a0, a1)\land\\ 
-        \paraTodo{c1}{Coordenada}{(coordenadaValida(c1, a0) \land \neg(c1 \in coords)) \implicaLuego a1[c1.f][c1.c] = a0[c1.f][c1.c]}
+        \paraTodo{c}{Coordenada}{(c \in a0 \land \neg(c \in coords)) \implicaLuego a1[c] = a0[c]}
 }
 
 % e0 es igual a e1 en todos los ejercicios menos en i
@@ -213,7 +198,7 @@ Chequea que la cantidad de estudiantes presentes sea menor o igual a los que ent
 
 % las coordenadas del alumno estan en el aula y el examen es el mismo
 \predLargo{perteneceAlumno}{e: Alumno, a:Aula}{
-    e.examen \neq \langle \rangle \land coordenadaValida(e.coord, a) \land \\ suExamen(e.cord, a) = e.examen
+    (e.coord \in a \land suExamen(e.cord, a) = e.examen)
 }
 
 % las coordenadas estan dentro del aula y c0 esta a distancia |2| de c1 en x o esta directamente adelante en y
@@ -228,7 +213,7 @@ Chequea que la cantidad de estudiantes presentes sea menor o igual a los que ent
 }
     
 % devuelve el examen del alumno en c1
-\aux{suExamen}{c1:Coordenada, a: Aula}{Examen} \ $a[c1.f][c1.c].examen$
+\aux{suExamen}{c1:Coordenada, a: Aula}{Examen} \ $a[c1]$
 
 
 \subsection{proc consultarDarkWeb}
@@ -280,17 +265,12 @@ Chequea que la cantidad de estudiantes presentes sea menor o igual a los que ent
         % vv aca me fijo que el resto de pasos esten igual
         e = subseq(res, 0, \norm{res}-1)\land\\
         % vv igualo el examen en edr con el examen q devuelvo
-        alumnoTieneEsteExamen(res[\norm{res}-1], a.coord, edr.aula)\land\\
-        % vv Todo el resto sigue igual
-        todosEstudiantesIgualesMenos(\langle a.coord \rangle, edr.aula, edr_0.aula)\land\\ 
+        edr.aula = setKey(edr_0.aula, a.coord, res[\norm{res}-1]) \land\\
         edr_0.solucion = edr.solucion \land\\
         edr_0.entregas = edr.entregas
     }
 \end{proc}
 
-\predLargo{alumnoTieneEsteExamen}{e: Examen, c: Coordenada, a: Aula}{
-    a[c.f][c.c] = \struct{coord:c, examen:e}
-}
 
 % existe solo 1 ejercicio con respuesta nueva en e1 que en e0 no estaba
 \predLargo{hayNuevoEjercicioResuelto}{e0, e1: Examen}{
@@ -319,8 +299,7 @@ Chequea que la cantidad de estudiantes presentes sea menor o igual a los que ent
     \aseguraLargo{
         % CAMBIO EL a.examen, ANTES REVISABA EL ULTIMO PASO
         edr.entregas = edr_0.entregas \cup \conj{a} \land
-        \\ suExamen(a.coord, edr.aula) = \langle \rangle \land
-        \\ todosEstudiantesIgualesMenos(\langle a.coord \rangle,edr,edr_0) \land
+        \\ edr.aula = delKey(edr_0.aula, a.coord) \land
         \\ edr.solucion = edr_0.solucion
     }
 \end{proc}

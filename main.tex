@@ -48,9 +48,9 @@ En proc \textit{chequearCopias}, en el aux \textit{porcentajeRespuestasIgualAdya
 $Nota\ ES\ \R$\\
 $Respuesta\ ES\ \Z$\\
 $Examen\ ES\ \seq{Respuesta}$\\
-$Coordenada\ ES\ struct\struct{f:\Z, c:\Z}$\\
-$Alumno\ ES\ struct\struct{coord:Coordenada, examen:Examen}$\\
-$Aula\ ES\ dicc\struct{Coordenada, Examen}$\\
+$Alumno\ ES\ struct\struct{f:\Z, c:\Z}$\\
+%$Alumno\ ES\ struct\struct{coord:Alumno, examen:Examen}$\\
+$Aula\ ES\ dicc\struct{Alumno, Examen}$\\
 \\
 % Acá arrancamos el TAD --------------------------------------------------
 \begin{tad}{EdR}
@@ -60,8 +60,8 @@ $Aula\ ES\ dicc\struct{Coordenada, Examen}$\\
 % RENOMBRE DE TIPOS --------------------------------------------------
 
 % Aula: Seq[Seq[Alumno]] - Doble secuencia para representar
-% Alumno: Struct {coord: Coordenada, examen: Examen}
-% Coordenada: Struct{f:Z, c:Z}
+% Alumno: Struct {coord: Alumno, examen: Examen}
+% Alumno: Struct{f:Z, c:Z}
 % Examen: Seq[Respuesta]
 % Respuesta: Char
 % Nota: Z
@@ -88,11 +88,11 @@ $Aula\ ES\ dicc\struct{Coordenada, Examen}$\\
     \\ rtaValida(s) \land
     \\ cantValidaEstudiantes(dimensionAula, cantEstudiantes)}
     \aseguraLargo{
-    \norm{res.aula} = cantEstudiantes \yLuego\\
-    coordenadasValidas(res.aula, dimensionAula) \yLuego
-    \\ examenesInicializados(res.aula, s) \yLuego
-    \\ noHayAlumnosJuntos(res.aula) \yLuego
-    \\ res.solucion = s \yLuego 
+    \norm{res.aula} = cantEstudiantes \land\\
+    coordenadasValidas(res.aula, dimensionAula) \land
+    \\ examenesInicializados(res.aula, s) \land
+    \\ noHayAlumnosJuntos(res.aula) \land
+    \\ res.solucion = s \land 
     \\ res.entregas = dicc\struct{}}
 \end{proc}
 
@@ -102,12 +102,12 @@ $Aula\ ES\ dicc\struct{Coordenada, Examen}$\\
 }
 
 \predLargo{coordenadasValida}{a:Aula, n: \Z}{
-    \paraTodo{c}{Coordenada}{c\in a \rightarrow (0 \leq c.c < n \land 0 \leq c.f < n)}
+    \paraTodo{c}{Alumno}{c\in a \rightarrow (0 \leq c.c < n \land 0 \leq c.f < n)}
 }
 
-% si c y f estan entre las dimensiones de aula la coordenada es valida 
+% si c y f estan entre las dimensiones de aula la Alumno es valida 
 % REMPLAZAR TODAS LAS APARICIONES CON "c \in a"
-% \predLargo{coordenadaValida}{coord:Coordenada, a:Aula}{0 \leq coord.f < \norm{a} \land 0 \leq coord.c < \norm{a}}
+% \predLargo{coordenadaValida}{coord:Alumno, a:Aula}{0 \leq coord.f < \norm{a} \land 0 \leq coord.c < \norm{a}}
 % \\
 %Chequea que la cantidad de estudiantes sea menor o igual a los que entran en el aula manteniendo la separación de al menos 1 asiento entre cada uno \\
 \predLargo{cantValidaEstudiantes}{a, c: \Z}{
@@ -115,13 +115,13 @@ $Aula\ ES\ dicc\struct{Coordenada, Examen}$\\
 }\\
 % si hay un alumno en el asiento entonces, el que le sigue tiene que ser vacio
 \pred{noHayAlumnosJuntos}{a: Aula}{
-    \paraTodo{c}{Coordenada}{c\in a \rightarrow
+    \paraTodo{c}{Alumno}{c\in a \rightarrow
     \struct{c.f,\ c.c+1} \notin a}
 }
 
 % todos los examenes en el aula estan sin responder y son del largo correcto
 \predLargo{examenesInicializados}{a: Aula, sol: Examen}{
-    \paraTodo{c}{Coordenada}{c\in a \rightarrow examenInicializado(a[c], sol)}
+    \paraTodo{c}{Alumno}{c\in a \rightarrow examenInicializado(a[c], sol)}
 }
 
 % El examen no tiene ninguna respuesta
@@ -151,20 +151,20 @@ $Aula\ ES\ dicc\struct{Coordenada, Examen}$\\
 % Metodo copiarse --------------------------------------------------
 \begin{proc}{copiarse}
 {
-\In a1: Coordenada,
+\In a1: Alumno,
 \Inout edr: EdR 
 }{
 \Tipo{}
 }
     \requiereLargo{ 
         a1 \in edr.aula \yLuego\\
-        \existe{a2}{Coordenada}{a2\in edr.aula \land\\
-        puedeCopiarse(a1, a2, edr.aula) \land\\
+        \existe{a2}{Alumno}{a2\in edr.aula \land\\
+        puedeCopiarse(a1, a2) \land\\
         respondioAlgunEjercicio(edr.aula[a2])}\land\\
         edr_0 = edr
     }
     \aseguraLargo{
-        \existe{i}{\Z}{0\leq i < \norm{a1.examen}\yLuego \existe{a2}{Coordenada}{\\
+        \existe{i}{\Z}{0\leq i < \norm{a1.examen}\yLuego \existe{a2}{Alumno}{\\
             a2\in edr_0.aula \land\\
             puedeCopiarse(a1, a2)\land\\
             respondio(i, edr_0.aula[a2]) \land\\
@@ -181,12 +181,6 @@ $Aula\ ES\ dicc\struct{Coordenada, Examen}$\\
 %     \norm{a1}=\norm{a2}
 % }
 
-% Las aulas son iguales en todas las coordenadas menos en las especificadas en coords 
-\predLargo{todosEstudiantesIgualesMenos}{coords: \seq{Coordenada}, a0, a1: Aula}{
-        \norm{a0} = \norm{a1}\land 
-        \paraTodo{c}{Coordenada}{(c \in a0 \land c \notin coords) \implicaLuego a1[c] = a0[c]}
-}
-
 % e0 es igual a e1 en todos los ejercicios menos en i
 \predLargo{mismosEjerciciosMenos}{i: \Z, e0, e1: Examen}{
     \norm{e1} = \norm{e0} \yLuego\\
@@ -196,7 +190,7 @@ $Aula\ ES\ dicc\struct{Coordenada, Examen}$\\
 
 
 % las coordenadas estan dentro del aula y c0 esta a distancia |2| de c1 en x o esta directamente adelante en y
-\predLargo{puedeCopiarse}{c1, c2: Coordenada}{
+\predLargo{puedeCopiarse}{c1, c2: Alumno}{
     ((\norm{c2.c - c1.c} = 2 \land c2.f = c1.f) \lor
     (c2.c = c1.c \land  c2.f - c1.f = 1))
 }
@@ -204,9 +198,6 @@ $Aula\ ES\ dicc\struct{Coordenada, Examen}$\\
 \predLargo{respondioAlgunEjercicio}{e:Examen}{
     \existe{i}{\Z}{respondio(i, e)}
 }
-    
-% devuelve el examen del alumno en c1
-\aux{suExamen}{c1:Coordenada, a: Aula}{Examen} \ $a[c1]$
 
 
 \subsection{proc consultarDarkWeb}
@@ -224,22 +215,29 @@ $Aula\ ES\ dicc\struct{Coordenada, Examen}$\\
     \\posiblesAccesos \geq 0
     }
     \aseguraLargo{
-    \existe {n}{\Z}{0 \leq n \leq posiblesAccesos \land 0 \leq n \leq cuantosEstudiantes(edr.aula) \land
-    \\ \existe {seCopian}{\seq{Coordenada}}{\norm{seCopian} = n \land 
-    \\ \paraTodo{c1}{Coordenada}{c1 \in seCopian \leftrightarrow 
-    (coordenadaValida(c1,edr_0.aula) \yLuego \\ suExamen(c1, edr_0.aula) \neq \langle \rangle \land
-    suExamen(c1,edr.aula) = s)} \land
+    \existe {n}{\Z}{0 \leq n \leq posiblesAccesos \land 0 \leq n \leq \norm{edr.aula} \land
+    \\ \existe {seCopian}{\conj{Alumno}}{\norm{seCopian} = n \land 
+    \\ \paraTodo{a1}{Alumno}{a1 \in seCopian \leftrightarrow 
+    (a1 \in edr_0.aula \yLuego \\edr_0.aula[a] \neq s \land
+    edr.aula[a] = s)} \land
     \\todosEstudiantesIgualesMenos(seCopian,edr.aula, edr_0.aula)}} \land
     \\edr.solucion = edr_0.solucion \land
     \\edr.entregas = edr_0.entregas
 }
 \end{proc}
+\\
+
+% Las aulas son iguales en todas las coordenadas menos en las especificadas en coords 
+\predLargo{todosEstudiantesIgualesMenos}{alumnos: \conj{Alumno}, a0, a1: Aula}{
+        \paraTodo{a}{Alumno}{(a \in a0 \land a \in a1 \land a \notin alumnos) \implicaLuego a1[a] = a0[a]}
+}
+
 \subsection{proc resolver}
 % Metodo resolver --------------------------------------------------
 \begin{proc}{resolver}
 {
 \Inout edr: EdR,
-\In a: Coordenada,
+\In a: Alumno,
 \In e: \seq{Examen}
 }{
 \Tipo{\seq{Examen}}
@@ -247,7 +245,7 @@ $Aula\ ES\ dicc\struct{Coordenada, Examen}$\\
     \requiereLargo{
     a \in edr.aula \land\\
     examenInicializado(edr.aula[a], edr.solucion)\land\\
-    \norm{e} > 0 \land\\
+    \norm{e} > 1 \land\\
     edr_0 = edr
     }
     \aseguraLargo{
@@ -274,13 +272,13 @@ $Aula\ ES\ dicc\struct{Coordenada, Examen}$\\
 }
 
 % el ejercicio i del examen fue resuelto
-\pred{respondio}{i: \Z, e: Examen}{0 \leq i < \norm{e} \yLuego e[i] \neq -1}
+\pred{respondio}{i: \Z, e: Examen}{0 \leq i < \norm{e} \yLuego 0 \leq e[i] \leq 9}
 
 \subsection{proc entregar}
 % Metodo entregar --------------------------------------------------
 \begin{proc}{entregar}
 {
-\In a: Coordenada,
+\In a: Alumno,
 \Inout edr: EdR
 }{
 }
@@ -289,7 +287,7 @@ $Aula\ ES\ dicc\struct{Coordenada, Examen}$\\
     } 
     \aseguraLargo{
         % CAMBIO EL a.examen, ANTES REVISABA EL ULTIMO PASO
-        edr.entregas = setKey(edr_0.entregas, a, edr.aula[a]) \land
+        edr.entregas = setKey(edr_0.entregas, a, edr_0.aula[a]) \land
         \\ edr.aula = delKey(edr_0.aula, a) \land
         \\ edr.solucion = edr_0.solucion
     }
@@ -305,20 +303,23 @@ $Aula\ ES\ dicc\struct{Coordenada, Examen}$\\
 }
     \requiere{todosEntregaron(edr)} 
     \asegura{
-        \paraTodo {a1}{Coordenada}{a1 \in edr.entregas \rightarrow (a1 \in res \leftrightarrow esSospechoso(a1)) \land 
-        \paraTodo{i, j}{\Z}{0 \leq i < \norm{res} \land 0 \leq j < \norm{res} \implicaLuego (res[i] = res[j] \leftrightarrow i = j)}}
+        \paraTodo {a1}{Alumno}{a1 \in edr.entregas \rightarrow (a1 \in res \leftrightarrow esSospechoso(a1))} \land 
+        sinElementosRepetidos(res)
         }
 \end{proc}
 \\
 
 % devuelve el porcentaje de respuestas iguales entre 2 alumnos
 \aux{porcentajeRespuestasIgualAdyacente}{e1, e2: Examen}{\Z}
-\\    $(\sum_{i=0}^{\norm{a1.examen}-1} IfThenElse((e1[i] = e2.examen[i]),1,0)) \cdot \frac{100}{\norm{e1}}$
-\\
+\\    $(\sum_{i=0}^{\norm{e1}-1} IfThenElse((e1[i] = e2[i]),1,0)) \cdot \frac{100}{\norm{e1}}$
+\\ \\
+/* Hacemos este pred con tipo de entrada $\seq{T}$, ya que no importa para el funcionamiento del pred qué tiene la secuencia adentro.*/ \\ \\
+\predLargo{sinElementosRepetidos}{s: \seq{T}}{
+    \paraTodo{i, j}{\Z}{0 \leq i < \norm{s} \land 0 \leq j < \norm{s} \implicaLuego (s[i] = s[j] \leftrightarrow i = j)}
+} \\
 
-% devuelve el porcentaje de alumnos que tienen el mismo examen que a1 en una secuencia
-\aux{porcentajeIgualAula}{e:Examen, entregas:dicc\struct{Coordenada, Examen}}{\Z}
-\\ $(\sum_{i \in entregas}IfThenElse( e \neq i\land e = i,1,0)) \cdot \frac{100}{\norm{entregas}-1}$
+\aux{porcentajeIgualAula}{a:Alumno, entregas:dicc\struct{Alumno, Examen}}{\Z}
+\\ $(\sum_{i \in entregas}IfThenElse( a \neq i\land entregas[a] = entregas[i],1,0)) \cdot \frac{100}{\norm{entregas}-1}$
 \\
 
 % No queda ningun estudiante en el aula
@@ -326,8 +327,8 @@ $Aula\ ES\ dicc\struct{Coordenada, Examen}$\\
     \norm{edr.entregas} > 0 \land \norm{edr.aula} = 0
 }
 
-\predLargo{esSospechoso}{edr: EdR, a1: Coordenada}{
-    \existe{a2}{Coordenada}{a2 \in edr.entregas  \land  puedeCopiarse(a1, a2, edr.aula) \land 
+\predLargo{esSospechoso}{edr: EdR, a1: Alumno}{
+    \existe{a2}{Alumno}{a2 \in edr.entregas  \land  puedeCopiarse(a1, a2, edr.aula) \land 
     \\ porcentajeRespuestasIgualAdyacente(edr.entregas[a1], edr.entregas[a2]) > 60} \ \lor \\porcentajeIgualAula(edr.entregas[a1], edr.entregas) > 25
 }
 
@@ -343,16 +344,16 @@ $Aula\ ES\ dicc\struct{Coordenada, Examen}$\\
     \aseguraLargo{
         % aca uso es si y solo si para que solo tenga esos elementos
         \paraTodo{a}{Alumno}{(a \in edr.entregas \land \lnot esSospechoso(edr, a)) \leftrightarrow\\
-        tupla\tupla{a, nota(a, edr.solucion)} \in res} \land \\
+        tupla\tupla{a, nota(edr.entregas[a], edr.solucion)} \in res} \land \\
         % me fijo que la tupla este una sola vez
-        \paraTodo{i, j}{\Z}{0 \leq i < \norm{res} \land 0 \leq j < \norm{res} \implicaLuego (res[i] = res[j] \leftrightarrow i = j)}
+        sinElementosRepetidos(res)
 }
 \end{proc}
 \\
 
 % Suma todas las respuestas correctas, lo divide por la cantidad de respuestas y lo multiplica por 10 (standar)
-\aux{nota}{a: Alumno, sol: Examen}{\R}
-    \\ $((\sum_{i=0}^{\norm{sol}-1}ifThenElse(a.examen[i] = sol[i], 1, 0))) \cdot \frac{10}{\norm{sol}}$
+\aux{nota}{e, sol: Examen}{\R}
+    \\ $((\sum_{i=0}^{\norm{sol}-1}ifThenElse(e[i] = sol[i], 1, 0))) \cdot \frac{10}{\norm{sol}}$
 
 \end{tad}
 
